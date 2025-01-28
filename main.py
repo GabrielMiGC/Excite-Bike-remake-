@@ -23,8 +23,8 @@ def inicializar_glfw():
     glMatrixMode(GL_MODELVIEW)
     return window
 
-def desenharCena(pista, posicao_jogador):
-    
+def desenharCena(pistas, posicao_jogador):
+    glClearColor(0, 0, 0.5, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
@@ -33,20 +33,32 @@ def desenharCena(pista, posicao_jogador):
             0, 0, posicao_jogador + 10,
             0, 1, 0)
 
-    # Instanciar e desenhar a pista
-    pista.desenhar()
+    for i, pista in enumerate(pistas):
+        glPushMatrix()
+        glTranslatef(0,0, -i*10)
+        pista.desenhar()
+        glPopMatrix()
 
 # Programa principal
 def main():
     window = inicializar_glfw()
-    textura_path = os.path.join("textures", "dirt_teste.jpg")
-    pista = Pista(comprimento=10000, largura=15, textura_path=textura_path)
+    texturas =[
+        os.path.join("textures", "dirt.jpg"),
+        os.path.join("textures", "dirt2.jpg"),
+        os.path.join("textures", "dirt3.jpg"),
+        os.path.join("textures", "dirt4.jpg")
+    ]
+    pistas = [
+        Pista(comprimento=10000, largura=15, textura_path=path) for path in texturas
+    ]
+
+
     posicao_jogador = 0
     while not glfw.window_should_close(window):
         glfw.poll_events()
         posicao_jogador += 0.5 #adicionar limitador 
 
-        desenharCena(pista, posicao_jogador)
+        desenharCena(pistas, posicao_jogador)
         glfw.swap_buffers(window)
     glfw.terminate()
 
