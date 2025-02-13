@@ -13,8 +13,15 @@ def inicializar_glfw():
     if not glfw.init():
         raise Exception("Falha ao inicializar o GLFW")
 
+
+    monitor = glfw.get_primary_monitor()
+    modo_video = glfw.get_video_mode(monitor)
+    
+    largura_tela = modo_video.size.width
+    altura_tela = modo_video.size.height
+
     # Criar janela
-    window = glfw.create_window(1440, 1040, "Excite Bike 3D - GLFW", None, None)
+    window = glfw.create_window(largura_tela, altura_tela, "Excite Bike 3D - GLFW", monitor, None)
     if not window:
         glfw.terminate()
         raise Exception("Falha ao criar janela GLFW")
@@ -22,12 +29,7 @@ def inicializar_glfw():
     glfw.make_context_current(window)
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_TEXTURE_2D)
-    #glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    glOrtho(-1,1,-1,1,-1,1)
-    #gluPerspective(50, 1440 / 1040, 0.1, 100) # FOV, aspecto, plano próximo, plano distante
-    glMatrixMode(GL_MODELVIEW)
-    return window
+    return window, largura_tela, altura_tela
 
 
 def inicializar_pistas():
@@ -52,8 +54,9 @@ def inicializar_pistas():
 
 # Programa principal
 def main():
-    window = inicializar_glfw()
+    window, largura_tela, altura_tela = inicializar_glfw()
     glfw.set_key_callback(window, util.key_callback)
+    glfw.set_mouse_button_callback(window, util.mouse_callback)
 
     pistas = inicializar_pistas()
     cube_textures = [
@@ -68,13 +71,15 @@ def main():
     sky = Skybox(cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):
-        print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
+        # print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
         glfw.poll_events()
         posicao_jogador += 0.015
         sky.update_offset(0.015)  # Update the offset for the side faces
 
-        #util.desenharCena(pistas, posicao_jogador, sky)
-        util.desenharMenu()
+        if consts.tela == "criacao":
+            util.desenharMenu(largura_tela, altura_tela)
+        elif consts.tela == "jogo":
+            util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual)
         glfw.swap_buffers(window)
     glfw.terminate()
     
