@@ -56,12 +56,12 @@ def main():
     while not glfw.window_should_close(window):
         # print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
         glfw.poll_events()
-        posicao_jogador += 0.015
         sky.update_offset(0.015)  # Update the offset for the side faces
 
         if consts.tela == "criacao":
             util.desenharMenu(largura_tela, altura_tela)
         elif consts.tela == "jogo":
+            posicao_jogador += 0.015
             util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual)
         glfw.swap_buffers(window)
     glfw.terminate()
