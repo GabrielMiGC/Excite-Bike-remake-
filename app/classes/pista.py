@@ -2,8 +2,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image
-
-
+from classes.obstaculos import *
 
 class Pista:
     def __init__(self, comprimento, largura, textura_path):
@@ -58,6 +57,12 @@ class Pista:
         glVertex3f(-self.largura / 2, 0, self.comprimento)
 
         glEnd()
+        
+        glPushMatrix()
+        glTranslatef(-2.5, 0, 100)
+        obstaculo1 = Obstaculos(0, 0, 10, 3)
+        obstaculo1.desenhar()
+        glPopMatrix()
 
         if self.textura:
             glBindTexture(GL_TEXTURE_2D, 0)  

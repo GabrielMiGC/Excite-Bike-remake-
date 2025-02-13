@@ -8,6 +8,9 @@ import consts
 
 def desenharMenu(largura_tela, altura_tela):
     
+    NUM_LINHAS = consts.NUM_LINHAS
+    NUM_COLUNAS = consts.NUM_COLUNAS
+    
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     glOrtho(0, largura_tela, altura_tela, 0, -1, 1)  # Define um sistema de coordenadas (3 linhas, 11 colunas)
@@ -21,8 +24,8 @@ def desenharMenu(largura_tela, altura_tela):
     
     x_inicio = (largura_tela - largura_matriz) / 2
     y_inicio = (altura_tela - altura_matriz) / 2
-    celula_largura = largura_matriz / 10
-    celula_altura = altura_matriz / 3
+    celula_largura = largura_matriz / NUM_COLUNAS
+    celula_altura = altura_matriz / NUM_LINHAS
     
     # --- Configurações dos Botões ---
     largura_botao = largura_tela * 0.1
@@ -49,7 +52,7 @@ def desenharMenu(largura_tela, altura_tela):
     largura_botao_iniciar = largura_tela * 0.2
     altura_botao_iniciar = altura_tela * 0.06
     x_inicio_botao = (largura_tela - largura_botao_iniciar) / 2
-    y_inicio_botao = yBot_inicio + 2*altura_matriz  # Abaixo dos botões de cor
+    y_inicio_botao = yBot_inicio + 2 * altura_matriz  # Abaixo dos botões de cor
 
     glColor3f(0.8, 0.8, 0.8)  # Cor do botão
     glBegin(GL_QUADS)
@@ -64,12 +67,14 @@ def desenharMenu(largura_tela, altura_tela):
     glLineWidth(3)
     glBegin(GL_LINES)
     
-    for i in range(4):
+    # Linhas horizontais
+    for i in range(NUM_LINHAS + 1):
         y = y_inicio + i * celula_altura
         glVertex2f(x_inicio, y)
         glVertex2f(x_inicio + largura_matriz, y)
         
-    for j in range(11):
+    # Linhas verticais
+    for j in range(NUM_COLUNAS + 1):
         x = x_inicio + j * celula_largura
         glVertex2f(x, y_inicio)
         glVertex2f(x, y_inicio + altura_matriz)
@@ -77,8 +82,8 @@ def desenharMenu(largura_tela, altura_tela):
     glEnd()
 
     # --- Desenhando a Matriz ---
-    for i in range(3):
-        for j in range(10):
+    for i in range(NUM_LINHAS):
+        for j in range(NUM_COLUNAS):
             glColor3f(*consts.matriz_cores[i][j])  # Cor de fundo das células
             x_min = x_inicio + j * celula_largura
             x_max = x_min + celula_largura
@@ -150,7 +155,12 @@ def mouse_callback(window, button, action, mods):
         # Verifica se o clique está no botão de iniciar
         if x_inicio_botao <= xpos <= x_inicio_botao + largura_botao_iniciar and \
            y_inicio_botao <= ypos <= y_inicio_botao + altura_botao_iniciar:
+            consts.matriz_exported = [
+                [consts.cor_para_numero.get(consts.matriz_cores[i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                for i in range(consts.NUM_LINHAS)
+            ]            
             consts.tela = "jogo"
+            print("Matriz exportada: ", consts.matriz_exported)
             print("Mudando para a tela do jogo!")
 
         # Verificar se o clique foi em algum botão
@@ -176,8 +186,8 @@ def mouse_callback(window, button, action, mods):
  
         # Verifica se o clique está dentro da matriz
         if x_inicio <= xpos <= x_inicio + largura_matriz and y_inicio <= ypos <= y_inicio + altura_matriz:
-            celula_largura = largura_matriz / 10
-            celula_altura = altura_matriz / 3
+            celula_largura = largura_matriz / consts.NUM_COLUNAS
+            celula_altura = altura_matriz / consts.NUM_LINHAS
 
             # Converter as coordenadas do clique para células da matriz
             x = int((xpos - x_inicio) / celula_largura)
