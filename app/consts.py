@@ -1,4 +1,7 @@
 
+import os
+
+
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)
 
@@ -19,3 +22,18 @@ posicoes_camera = [
 ]
 index_camera_atual = 0
 
+texturas_pista = [
+        os.path.join("textures", "dirt.jpg"),
+        os.path.join("textures", "dirt2.jpg"),
+        os.path.join("textures", "dirt3.jpg"),
+        os.path.join("textures", "dirt4.jpg")
+    ]
+
+cube_textures = [
+        os.path.join("textures", "front.jpg"),
+        os.path.join("textures", "back.jpg"),
+        os.path.join("textures", "sky.jpg"),
+        os.path.join("textures", "dirt.jpg"),
+        os.path.join("textures", "lado.jpg"),
+        os.path.join("textures", "lado.jpg")
+    ]

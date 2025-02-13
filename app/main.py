@@ -4,7 +4,6 @@ from classes.skybox import Skybox
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import consts
-import os
 import util
 
 
@@ -33,19 +32,10 @@ def inicializar_glfw():
 
 
 def inicializar_pistas():
-    texturas = [
-        os.path.join("textures", "dirt.jpg"),
-        os.path.join("textures", "dirt2.jpg"),
-        os.path.join("textures", "dirt3.jpg"),
-        os.path.join("textures", "dirt4.jpg")
-    ]
-
-    comprimento_pista = 100
-    largura_pista = 15
     pistas = []
-    for i, textura in enumerate(texturas):  
-        pista = Pista(comprimento=comprimento_pista, largura=largura_pista, textura_path=textura)
-        pista.posicao_inicial = -(i * comprimento_pista)
+    for i, textura in enumerate(consts.texturas_pista):  
+        pista = Pista(comprimento=1000, largura=15, textura_path=textura)
+        pista.posicao_inicial = -(i * 1000)
         pistas.append(pista)
     
     return pistas
@@ -59,16 +49,9 @@ def main():
     glfw.set_mouse_button_callback(window, util.mouse_callback)
 
     pistas = inicializar_pistas()
-    cube_textures = [
-        os.path.join("textures", "front.jpg"),
-        os.path.join("textures", "back.jpg"),
-        os.path.join("textures", "sky.jpg"),
-        os.path.join("textures", "dirt.jpg"),
-        os.path.join("textures", "lado.jpg"),
-        os.path.join("textures", "lado.jpg")
-    ]
+    
 
-    sky = Skybox(cube_textures)
+    sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):
         # print(f"Frame renderizado - posição do jogador: {posicao_jogador}")

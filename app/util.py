@@ -4,6 +4,8 @@ from OpenGL.GLU import *
 import math
 from PIL import Image
 from OpenGL.GL import *
+import glfw
+import glm
 import consts
 
 def desenharMenu(largura_tela, altura_tela):
