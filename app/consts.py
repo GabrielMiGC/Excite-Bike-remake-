@@ -1,6 +1,14 @@
 
 tela ="criacao"
+botao_selecionado = (0.1, 0.1, 0.1)
 
+CORES_BOTOES = [
+    (1.0, 0.0, 0.0),  # Vermelho
+    (0.0, 1.0, 0.0),  # Verde
+    (0.0, 0.0, 1.0)   # Azul
+]
+
+matriz_cores = [[(0.1, 0.1, 0.1) for _ in range(10)] for _ in range(3)]  # Branco por padrão
 
 posicoes_camera = [
     (0, 10, 0,   0, 0, 10,   0, 1, 0), #terceira pessoa
