@@ -1,10 +1,11 @@
 import glfw
-from pista import Pista
-from skybox import Skybox
+from classes.pista import Pista
+from classes.skybox import Skybox
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PIL import Image
+import consts
 import os
+import util
 
 
 
@@ -21,50 +22,13 @@ def inicializar_glfw():
     glfw.make_context_current(window)
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_TEXTURE_2D)
-    glMatrixMode(GL_PROJECTION)
+    #glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(50, 1440 / 1040, 0.1, 100) # FOV, aspecto, plano próximo, plano distante
+    glOrtho(-1,1,-1,1,-1,1)
+    #gluPerspective(50, 1440 / 1040, 0.1, 100) # FOV, aspecto, plano próximo, plano distante
     glMatrixMode(GL_MODELVIEW)
     return window
 
-posicoes_camera = [
-    (0, 10, 0,   0, 0, 10,   0, 1, 0), #terceira pessoa
-    (10, 10, 0,  0, 0, 10,   0, 1, 0), #canto superior esquerdo (atrás)
-    (0, 5, 0,    0, 6, 10,   0, 1, 0), # primeira pessoa
-    (-10, 10,0,  0, 0, 10,   0, 1, 0), #canto superior direito (atrás)
-    (0, 6, 10,  5, 5, 0,   0, 1, 0)  # visão lateral (2D)
-]
-index_camera_atual = 0
-
-def key_callback(window, key, scancode, action, mods):
-    global index_camera_atual
-    if key == glfw.KEY_C and action == glfw.PRESS:
-        index_camera_atual = (index_camera_atual + 1) % len(posicoes_camera)
-        print(f"Alterando para a câmera {index_camera_atual}")  # Debug
-
-def desenharCena(pistas, posicao_jogador, skybox):
-    glClearColor(0, 0, 0.5, 0)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glLoadIdentity()
-
-    #  câmera
-    cam_pos = posicoes_camera[index_camera_atual]
-    gluLookAt(cam_pos[0], cam_pos[1], posicao_jogador + cam_pos[2], 
-              cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
-              cam_pos[6], cam_pos[7], cam_pos[8])
-
-
-    for pista in pistas:
-        glPushMatrix()
-        glTranslate(0,0,-pista.posicao_inicial)
-        pista.desenhar()
-        glPopMatrix()
-
-    # Desenhar o cubo
-    glPushMatrix()
-    glTranslatef(0, 0, posicao_jogador+ 10)
-    skybox.draw_cube()
-    glPopMatrix()
 
 def inicializar_pistas():
     texturas = [
@@ -74,7 +38,7 @@ def inicializar_pistas():
         os.path.join("textures", "dirt4.jpg")
     ]
 
-    comprimento_pista = 1000
+    comprimento_pista = 100
     largura_pista = 15
     pistas = []
     for i, textura in enumerate(texturas):  
@@ -89,7 +53,7 @@ def inicializar_pistas():
 # Programa principal
 def main():
     window = inicializar_glfw()
-    glfw.set_key_callback(window, key_callback)
+    glfw.set_key_callback(window, util.key_callback)
 
     pistas = inicializar_pistas()
     cube_textures = [
@@ -106,10 +70,13 @@ def main():
     while not glfw.window_should_close(window):
         print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
         glfw.poll_events()
-        posicao_jogador += 0.015  
-        desenharCena(pistas, posicao_jogador, sky)
+        posicao_jogador += 0.015
+        sky.update_offset(0.015)  # Update the offset for the side faces
+
+        #util.desenharCena(pistas, posicao_jogador, sky)
+        util.desenharMenu()
         glfw.swap_buffers(window)
     glfw.terminate()
-
+    
 if __name__ == "__main__":
     main()

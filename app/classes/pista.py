@@ -29,7 +29,8 @@ class Pista:
 
         return texture_id
 
-        
+    def pistaMatrix(self):
+        pass      
 
     def desenhar(self):
         if self.textura:
