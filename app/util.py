@@ -103,12 +103,12 @@ def desenharMenu(largura_tela, altura_tela):
             glVertex2f(x_min, y_max)
             glEnd()
 
-def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera):
+def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera, moto):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(50, 1440 / 1040, 0.1, 100)
     glMatrixMode(GL_MODELVIEW)
-    
+            
     glClearColor(0, 0, 0.5, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
@@ -168,6 +168,16 @@ def key_callback(window, key, scancode, action, mods):
         print(f"Alterando para a câmera {consts.index_camera_atual}")  # Debug
     if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
         glfw.set_window_should_close(window, True)
+    if key == glfw.KEY_LEFT:
+        if action == glfw.PRESS:
+            consts.movimentando_esq = True
+        elif action == glfw.RELEASE:
+            consts.movimentando_esq = False
+    if key == glfw.KEY_RIGHT:
+        if action == glfw.PRESS:
+            consts.movimentando_dir = True
+        elif action == glfw.RELEASE:
+            consts.movimentando_dir = False
 
 
 def mouse_callback(window, button, action, mods):
@@ -230,7 +240,6 @@ def mouse_callback(window, button, action, mods):
             y = int((ypos - y_inicio) / celula_altura)
 
             consts.matriz_cores[y][x] = consts.botao_selecionado
-
 
 def shading (): #Phong
     # Reflexão do ambiente (Ra = Ia * Ka)
