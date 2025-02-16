@@ -1,12 +1,16 @@
 import glfw
 from OpenGL.GL import *
 from OpenGL.GLU import *
-import math
+import time
 from PIL import Image
 from OpenGL.GL import *
 import glfw
-import glm
 import consts
+import classes.camera as cam
+
+
+# Crie uma instância global
+camera_state = cam.CameraState()
 
 def desenharMenu(largura_tela, altura_tela):
     
@@ -102,31 +106,69 @@ def desenharMenu(largura_tela, altura_tela):
 def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(50, 1440 / 1040, 0.1, 100) # FOV, aspecto, plano próximo, plano distante
+    gluPerspective(50, 1440 / 1040, 0.1, 100)
     glMatrixMode(GL_MODELVIEW)
     
     glClearColor(0, 0, 0.5, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
-    #  câmera
-    cam_pos = consts.posicoes_camera[consts.index_camera_atual]
-    gluLookAt(cam_pos[0], cam_pos[1], posicao_jogador + cam_pos[2], 
-              cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
-              cam_pos[6], cam_pos[7], cam_pos[8])
+    # Controle da transição da câmera
+    target_cam_pos = posicoes_camera[index_camera]
+    
+    # Iniciar nova transição se a câmera mudar
+    if camera_state.target_cam_pos != target_cam_pos:
+        camera_state.start_cam_pos = camera_state.current_cam_pos or target_cam_pos
+        camera_state.target_cam_pos = target_cam_pos
+        camera_state.transition_start_time = time.time()
+        camera_state.is_transitioning = True
 
+    # Calcular progresso da animação
+    if camera_state.is_transitioning:
+        elapsed = time.time() - camera_state.transition_start_time
+        t = min(elapsed / camera_state.transition_duration, 1.0)
+        
+        # Interpolação cúbica para suavizar
+        t_ease = t * t * (3 - 2 * t)
+        # Para easing mais acentuado
+        #t_ease = t ** 2
+        # Ou easing elástico
+        #t_ease = math.sin(t * math.pi * 0.5)
+        
+        # Interpolar todos os componentes da câmera
+        cam_pos = [
+            lerp(camera_state.start_cam_pos[i], camera_state.target_cam_pos[i], t_ease)
+            for i in range(9)
+        ]
+        
+        if t >= 1.0:
+            camera_state.is_transitioning = False
+        camera_state.current_cam_pos = cam_pos
+    else:
+        cam_pos = camera_state.target_cam_pos
 
+    # Aplicar posição da câmera (interpolada ou final)
+    gluLookAt(
+        cam_pos[0], cam_pos[1], posicao_jogador + cam_pos[2], 
+        cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
+        cam_pos[6], cam_pos[7], cam_pos[8]
+    )
+
+    # ... (restante do código igual)
     for pista in pistas:
         glPushMatrix()
         glTranslate(0,0,-pista.posicao_inicial)
         pista.desenhar()
         glPopMatrix()
 
-    # Desenhar o cubo
     glPushMatrix()
-    glTranslatef(0, 0, posicao_jogador+ 10)
+    glTranslatef(0, 0, posicao_jogador + 10)
     skybox.draw_cube()
     glPopMatrix()
+
+# Adicione esta função de ajuda fora da classe
+def lerp(a, b, t):
+    return a + (b - a) * t
 
 def key_callback(window, key, scancode, action, mods):
     if key == glfw.KEY_C and action == glfw.PRESS:

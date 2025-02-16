@@ -33,10 +33,14 @@ def inicializar_glfw():
 
 def inicializar_pistas():
     pistas = []
-    for i, textura in enumerate(consts.texturas_pista):  
-        pista = Pista(comprimento=1000, largura=15, textura_path=textura)
-        pista.posicao_inicial = -(i * 1000)
-        pistas.append(pista)
+    # Cria uma única pista com 3 texturas diferentes
+    pista = Pista(
+        comprimento=5000,
+        largura=15,
+        texturas_path=consts.texturas_pista  # Deve ser uma lista com 3 caminhos de textura
+    )
+    pista.posicao_inicial = 0  # Ajuste conforme necessário
+    pistas.append(pista)
     
     return pistas
 

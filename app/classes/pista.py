@@ -8,18 +8,14 @@ import glm
 
 
 class Pista:
-    def __init__(self, comprimento, largura, textura_path):
+    def __init__(self, comprimento, largura, texturas_path):
         self.comprimento = comprimento
         self.largura = largura
-        self.textura_path = textura_path
-        self.textura = self.carregar_textura(textura_path)
+        self.texturas = [self.carregar_textura(t) for t in texturas_path]  # Lista de texturas
         self.velocidade = 0.1
         self.offset = 0.0
-        self.lightDiffuse = glm.vec3(1.0)      # Id               
-        self.surfaceDiffuse = glm.vec3(1.0)    # Kd       
-        self.lightSpecular = glm.vec3(1.0)     # Is
-        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
-        self.surfaceShine = 250
+        self.raias = 3  # Número de raias
+        self.largura_raia = largura / self.raias
 
         # Parâmetros da onda
         self.wave_length = 20.0  # Comprimento de onda
@@ -59,37 +55,42 @@ class Pista:
         return y * self.wave_amplitude
 
     def desenhar(self):
-        if self.textura:
-            glEnable(GL_TEXTURE_2D)
-            glBindTexture(GL_TEXTURE_2D, self.textura)
-
-        # Atualiza o deslocamento da textura
+        glColor3f(1, 1, 1)
         self.offset += self.velocidade
         if self.offset >= 1000.0:
             self.offset -= 1000.0
 
-        glColor3f(1, 1, 1)
-        glBegin(GL_QUAD_STRIP)
-
-        segments = 200  # Número de segmentos para suavização
+        # Ajuste dinâmico de segmentos baseado no comprimento da onda
+        segments = int(self.comprimento / (self.wave_length / 4))  # 4 segmentos por onda
         delta_z = self.comprimento / segments
 
-        for i in range(segments + 1):
-            z = i * delta_z
-            y = self.get_y(z)
+        # Desenha cada raia separadamente
+        for raia in range(self.raias):
+            if self.texturas:
+                glEnable(GL_TEXTURE_2D)
+                glBindTexture(GL_TEXTURE_2D, self.texturas[raia % len(self.texturas)])
 
-            # Cálculo das coordenadas de textura
-            s = (z / self.comprimento) * 1000 + self.offset
+            # Calcula os limites da raia
+            x_left = -self.largura/2 + raia * self.largura_raia
+            x_right = x_left + self.largura_raia
 
-            # Vértice esquerdo
-            glTexCoord2f(s, 0)
-            glVertex3f(-self.largura / 2, y, z)
+            glBegin(GL_QUAD_STRIP)
+            for i in range(segments + 1):
+                z = i * delta_z
+                y = self.get_y(z)
+                s = (z / self.comprimento) * 1000 + self.offset
 
-            # Vértice direito
-            glTexCoord2f(s, 1)
-            glVertex3f(self.largura / 2, y, z)
+                # Vértices para esta raia
+                glTexCoord2f(s, 0)
+                glVertex3f(x_left, y, z)
+                
+                glTexCoord2f(s, 1)
+                glVertex3f(x_right, y, z)
+            glEnd()
 
-        glEnd()
+            if self.texturas:
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glDisable(GL_TEXTURE_2D)
         
         glPushMatrix()
         glTranslatef(-2.5, 0, 100)
@@ -97,6 +98,6 @@ class Pista:
         obstaculo1.desenhar()
         glPopMatrix()
 
-        if self.textura:
+        if self.texturas:
             glBindTexture(GL_TEXTURE_2D, 0)
             glDisable(GL_TEXTURE_2D)

@@ -5,8 +5,8 @@ import os
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)
 
-NUM_LINHAS = 3
-NUM_COLUNAS = 10
+NUM_LINHAS = 5
+NUM_COLUNAS = 15
 
 CORES_BOTOES = [
     (1.0, 0.0, 0.0),  # Vermelho
@@ -38,12 +38,11 @@ texturas_pista = [
         os.path.join("textures", "dirt.jpg"),
         os.path.join("textures", "dirt2.jpg"),
         os.path.join("textures", "dirt3.jpg"),
-        os.path.join("textures", "dirt4.jpg")
     ]
 
 cube_textures = [
         os.path.join("textures", "front.jpg"),
-        os.path.join("textures", "back.jpg"),
+        os.path.join("textures", "front.jpg"),
         os.path.join("textures", "sky.jpg"),
         os.path.join("textures", "dirt.jpg"),
         os.path.join("textures", "lado.jpg"),
