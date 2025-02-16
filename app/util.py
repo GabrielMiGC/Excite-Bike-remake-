@@ -128,12 +128,7 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera)
         elapsed = time.time() - camera_state.transition_start_time
         t = min(elapsed / camera_state.transition_duration, 1.0)
         
-        # Interpolação cúbica para suavizar
         t_ease = t * t * (3 - 2 * t)
-        # Para easing mais acentuado
-        #t_ease = t ** 2
-        # Ou easing elástico
-        #t_ease = math.sin(t * math.pi * 0.5)
         
         # Interpolar todos os componentes da câmera
         cam_pos = [
@@ -147,14 +142,12 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera)
     else:
         cam_pos = camera_state.target_cam_pos
 
-    # Aplicar posição da câmera (interpolada ou final)
     gluLookAt(
         cam_pos[0], cam_pos[1], posicao_jogador + cam_pos[2], 
         cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
         cam_pos[6], cam_pos[7], cam_pos[8]
     )
 
-    # ... (restante do código igual)
     for pista in pistas:
         glPushMatrix()
         glTranslate(0,0,-pista.posicao_inicial)
@@ -166,7 +159,6 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera)
     skybox.draw_cube()
     glPopMatrix()
 
-# Adicione esta função de ajuda fora da classe
 def lerp(a, b, t):
     return a + (b - a) * t
 
@@ -194,7 +186,7 @@ def mouse_callback(window, button, action, mods):
         largura_botao_iniciar = largura_janela * 0.2
         altura_botao_iniciar = altura_janela * 0.06
         x_inicio_botao = (largura_janela - largura_botao_iniciar) / 2
-        y_inicio_botao = yBot_inicio + 2*altura_janela * 0.3  # Ajuste conforme necessário
+        y_inicio_botao = yBot_inicio + 2*altura_janela * 0.3
 
         # Verifica se o clique está no botão de iniciar
         if x_inicio_botao <= xpos <= x_inicio_botao + largura_botao_iniciar and \
