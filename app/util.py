@@ -7,6 +7,7 @@ from OpenGL.GL import *
 import glfw
 import consts
 import classes.camera as cam
+import glm
 
 
 # Crie uma instância global
@@ -103,12 +104,12 @@ def desenharMenu(largura_tela, altura_tela):
             glVertex2f(x_min, y_max)
             glEnd()
 
-def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera):
+def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera, moto):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(50, 1440 / 1040, 0.1, 100)
     glMatrixMode(GL_MODELVIEW)
-    
+            
     glClearColor(0, 0, 0.5, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
@@ -147,6 +148,14 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera)
         cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
         cam_pos[6], cam_pos[7], cam_pos[8]
     )
+    
+    glPushMatrix()
+    glTranslatef(0, -1, cam_pos[2] + posicao_jogador + 6)
+    glRotatef(90, 0, 1, 0)
+    glTranslatef(0, 0, 0)
+    glScalef(0.6, 0.6, 0.6)
+    moto.desenhar()
+    glPopMatrix()
 
     for pista in pistas:
         glPushMatrix()
@@ -168,6 +177,16 @@ def key_callback(window, key, scancode, action, mods):
         print(f"Alterando para a câmera {consts.index_camera_atual}")  # Debug
     if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
         glfw.set_window_should_close(window, True)
+    if key == glfw.KEY_LEFT:
+        if action == glfw.PRESS:
+            consts.movimentando_esq = True
+        elif action == glfw.RELEASE:
+            consts.movimentando_esq = False
+    if key == glfw.KEY_RIGHT:
+        if action == glfw.PRESS:
+            consts.movimentando_dir = True
+        elif action == glfw.RELEASE:
+            consts.movimentando_dir = False
 
 
 def mouse_callback(window, button, action, mods):
@@ -231,9 +250,51 @@ def mouse_callback(window, button, action, mods):
 
             consts.matriz_cores[y][x] = consts.botao_selecionado
 
-
 def shading (): #Phong
     # Reflexão do ambiente (Ra = Ia * Ka)
     ambientShading = CONSTS.light
 
     return shades
+
+def load_obj_gol(filename):
+    vertices = []
+    textures = []
+    normals = []
+    faces = []
+    current_material = None
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('v '):  # Linha de vértice
+                parts = line.split()
+                vertex = list(map(float, parts[1:4]))
+                vertices.append(vertex)
+            elif line.startswith('vt '):  # Linha de textura
+                parts = line.split()
+                texture = list(map(float, parts[1:3]))
+                textures.append(texture)
+            elif line.startswith('vn '):  # Linha de normal
+                parts = line.split()
+                normal = list(map(float, parts[1:4]))
+                normals.append(normal)
+            elif line.startswith('usemtl '):  # Linha de material
+                parts = line.split()
+                current_material = parts[1]
+            elif line.startswith('f '):  # Linha de face
+                parts = line.split()
+                face = []
+                for part in parts[1:]:
+                    vals = part.split('/')
+                    vertex_index = int(vals[0]) - 1
+                    texture_index = int(vals[1]) - 1 if len(vals) > 1 and vals[1] else None
+                    normal_index = int(vals[2]) - 1 if len(vals) > 2 and vals[2] else None
+                    face.append((vertex_index, texture_index, normal_index, current_material))
+                faces.append(face)
+
+    return vertices, textures, normals, faces
+
+def update_movimento(movimentando_esq, movimentando_dir):
+    if movimentando_esq:
+        consts.positionBike.z = glm.clamp(consts.positionBike.z + 0.1, -12, 12)
+    elif movimentando_dir:
+        consts.positionBike.z = glm.clamp(consts.positionBike.z - 0.1, -12, 12)
