@@ -1,13 +1,13 @@
 import glfw
 from classes.pista import Pista
 from classes.moto import Moto
+from classes.obstaculos import *
 from classes.skybox import Skybox
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import consts
 import util
-
-
+import glm
 
 def inicializar_glfw():
     if not glfw.init():
@@ -55,6 +55,7 @@ def main():
 
     pistas = inicializar_pistas()
     moto = Moto()
+    consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
     
 
     sky = Skybox(consts.cube_textures)
@@ -64,11 +65,14 @@ def main():
         glfw.poll_events()
         util.update_movimento(consts.movimentando_esq, consts.movimentando_dir) # movimento da moto
         sky.update_offset(0.015)  # Update the offset for the side faces
-
+        
         if consts.tela == "criacao":
             util.desenharMenu(largura_tela, altura_tela)
         elif consts.tela == "jogo":
-            posicao_jogador += 0.015
+            if util.calc_colision(posicao_jogador):
+                print("Colisão detectada!")
+            else:
+                posicao_jogador += 0.25
             util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto)
         glfw.swap_buffers(window)
     glfw.terminate()
