@@ -8,8 +8,12 @@ movimentando_dir = False
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)
 
-NUM_LINHAS = 5
-NUM_COLUNAS = 15
+NUM_LINHAS = 3
+NUM_COLUNAS = 10
+
+LARGURA_MOTO = 0.6
+LARGURA_OBSTACULO = 5
+COMPRIMENTO_MOTO = 1.75
 
 CORES_BOTOES = [
     (1.0, 0.0, 0.0),  # Vermelho
@@ -26,7 +30,8 @@ cor_para_numero = {
 
 matriz_cores = [[(0.1, 0.1, 0.1) for _ in range(NUM_COLUNAS)] for _ in range(NUM_LINHAS)]  # Branco por padrão
 
-matriz_exported = None
+coordenadas_obstaculos = []
+obstaculo1 = None
 
 positionBike = glm.vec3(0.0, 0.0, 0.0)
 

@@ -2,8 +2,8 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image
-from classes.obstaculos import *
 from util import shading
+import consts
 import glm
 
 
@@ -92,12 +92,14 @@ class Pista:
                 glBindTexture(GL_TEXTURE_2D, 0)
                 glDisable(GL_TEXTURE_2D)
         
-        glPushMatrix()
-        glTranslatef(-2.5, 0, 100)
-        obstaculo1 = Obstaculos(0, 0, 10, 3)
-        obstaculo1.desenhar()
-        glPopMatrix()
-
+        # Desenha obstáculo
+        for seg in consts.coordenadas_obstaculos:
+            for (z, x) in seg:
+                glPushMatrix()
+                consts.obstaculo1.position = glm.vec3(x, 0, z)
+                consts.obstaculo1.desenhar()
+                glPopMatrix()
+            
         if self.texturas:
             glBindTexture(GL_TEXTURE_2D, 0)
             glDisable(GL_TEXTURE_2D)

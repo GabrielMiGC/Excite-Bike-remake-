@@ -8,6 +8,7 @@ import glfw
 import consts
 import classes.camera as cam
 import glm
+import numpy as np
 
 
 # Crie uma instância global
@@ -210,12 +211,20 @@ def mouse_callback(window, button, action, mods):
         # Verifica se o clique está no botão de iniciar
         if x_inicio_botao <= xpos <= x_inicio_botao + largura_botao_iniciar and \
            y_inicio_botao <= ypos <= y_inicio_botao + altura_botao_iniciar:
-            consts.matriz_exported = [
+            matriz_exported = [
                 [consts.cor_para_numero.get(consts.matriz_cores[i][j], -1) for j in range(consts.NUM_COLUNAS)]
                 for i in range(consts.NUM_LINHAS)
             ]            
             consts.tela = "jogo"
-            print("Matriz exportada: ", consts.matriz_exported)
+            
+            z_values = [2.5, -2.5, -7.5]
+            matriz = np.array(matriz_exported)
+            consts.coordenadas_obstaculos = [
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                for seg, linha in enumerate(matriz)
+            ]
+            print("Matriz exportada: ", matriz_exported)
+            print("Coordenadas dos obstáculos: ", consts.coordenadas_obstaculos)
             print("Mudando para a tela do jogo!")
 
         # Verificar se o clique foi em algum botão
@@ -295,6 +304,21 @@ def load_obj_gol(filename):
 
 def update_movimento(movimentando_esq, movimentando_dir):
     if movimentando_esq:
-        consts.positionBike.z = glm.clamp(consts.positionBike.z + 0.1, -12, 12)
+        consts.positionBike.z = glm.clamp(consts.positionBike.z + 0.2, -12, 12)
     elif movimentando_dir:
-        consts.positionBike.z = glm.clamp(consts.positionBike.z - 0.1, -12, 12)
+        consts.positionBike.z = glm.clamp(consts.positionBike.z - 0.2, -12, 12)
+        
+def converter_posicao_moto():
+    # posição da moto varia de -12 a 12, a pista varia de -7.5 a 7.5
+    return (((consts.positionBike.z + 12) * (7.5 - (-7.5)) / (12 - (-12))) - 7.5)
+
+def calc_colision(posição_jogador):
+    for seg in consts.coordenadas_obstaculos:
+        for (z, x) in seg:
+            if (
+                x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+            ):
+                return True
+    return False
