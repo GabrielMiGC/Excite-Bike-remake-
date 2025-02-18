@@ -1,31 +1,14 @@
-import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PIL import Image
 from classes.obstaculos import *
-from util import shading, load_obj_gol
+from util import shading, load_obj
 import glm
 import consts
 
 
 class Moto:
     def __init__(self):
-        self.vertices, _, self.normals, self.faces = load_obj_gol('app/objetos/motoSimples.obj')
-
-    def carregar_textura(self, textura_path):
-        img = Image.open(textura_path).convert("RGBA")
-        img_data = np.array(img, dtype=np.uint8)
-        width, height = img.size
-
-        texture_id = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, texture_id)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
-
-        return texture_id
+        self.vertices, _, self.normals, self.faces = load_obj('app/objetos/motoSimples.obj')
 
     def desenhar(self):
         

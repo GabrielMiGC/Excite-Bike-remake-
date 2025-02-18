@@ -265,7 +265,7 @@ def shading (): #Phong
 
     return shades
 
-def load_obj_gol(filename):
+def load_obj(filename):
     vertices = []
     textures = []
     normals = []
