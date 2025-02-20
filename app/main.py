@@ -64,12 +64,13 @@ def main():
         # print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
         glfw.poll_events()
         util.update_movimento(consts.movimentando_esq, consts.movimentando_dir) # movimento da moto
-        sky.update_offset(0.015)  # Update the offset for the side faces
+        sky.update_offset(consts.offset_sky)  # Update the offset for the side faces
         
         if consts.tela == "criacao":
             util.desenharMenu(largura_tela, altura_tela)
         elif consts.tela == "jogo":
-            if util.calc_colision(posicao_jogador):
+            consts.colisao = util.calc_colision(posicao_jogador)
+            if consts.colisao:
                 print("Colisão detectada!")
             else:
                 posicao_jogador += 0.25
