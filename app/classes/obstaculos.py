@@ -33,7 +33,7 @@ class Obstaculos:
 
 
     def desenhar(self):
-        """Desenha a barreira como um retângulo."""
+        """Desenha a barreira"""
         
         glTranslatef(self.position.x, self.position.y, self.position.z + 1.5)
         glPushMatrix()        
