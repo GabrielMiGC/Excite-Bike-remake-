@@ -21,6 +21,13 @@ CORES_BOTOES = [
     (0.0, 0.0, 1.0)   # Azul
 ]
 
+texturas_botoes = {
+    "obs1" : [os.path.join("textures", "obs1.png"), 0],
+    "obs2" : [os.path.join("textures", "obs1.png"), 0],
+    "obs3" : [os.path.join("textures", "obs1.png"), 0],
+    "iniciar" : [os.path.join("textures", "iniciar.png"), 0],
+}
+
 cor_para_numero = {
     (0.1, 0.1, 0.1): 0,
     (1.0, 0.0, 0.0): 1,  # Vermelho

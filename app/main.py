@@ -57,7 +57,10 @@ def main():
     moto = Moto()
     consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
     
-
+    # Carregar texturar dos botões de criação da pista e iniciar
+    for textura in consts.texturas_botoes.values():
+        textura[1] = util.carregar_textura(textura[0])
+        
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):

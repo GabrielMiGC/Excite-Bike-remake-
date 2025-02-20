@@ -14,6 +14,21 @@ import numpy as np
 # Crie uma instância global
 camera_state = cam.CameraState()
 
+def carregar_textura(textura_path):
+    img = Image.open(textura_path).convert("RGBA")
+    img_data = np.array(img, dtype=np.uint8)
+    width, height = img.size
+
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+
+    return texture_id
+
 def desenharMenu(largura_tela, altura_tela):
     
     NUM_LINHAS = consts.NUM_LINHAS
@@ -43,32 +58,58 @@ def desenharMenu(largura_tela, altura_tela):
     yBot_inicio = y_inicio - altura_botao - 20  # Espaço acima da matriz
 
     # --- Desenhar os botões de criação de objetos ---
+    glEnable(GL_TEXTURE_2D)
     for i, cor in enumerate(consts.CORES_BOTOES):
-        glColor3f(*cor)
-        glBegin(GL_QUADS)
+        glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes.get(f"obs{i+1}")[1])
+        glColor3f(1, 1, 1)  # Cor do botão
+        
         x_min = xBot_inicio + i * (largura_botao + espaco_botao)
         x_max = x_min + largura_botao
         y_min = yBot_inicio
         y_max = yBot_inicio + altura_botao
+        
+        # Desenha o botão com textura
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(x_min, y_min)
+        glTexCoord2f(1, 0); glVertex2f(x_max, y_min)
+        glTexCoord2f(1, 1); glVertex2f(x_max, y_max)
+        glTexCoord2f(0, 1); glVertex2f(x_min, y_max)
+        glEnd()
+        
+        # Desenha a borda colorida
+        glDisable(GL_TEXTURE_2D)  # Desativa textura para a borda
+        glColor3f(*cor)  # Define a cor da borda
+        glLineWidth(5)  # Define a espessura da borda
+
+        glBegin(GL_LINE_LOOP)
         glVertex2f(x_min, y_min)
         glVertex2f(x_max, y_min)
         glVertex2f(x_max, y_max)
         glVertex2f(x_min, y_max)
         glEnd()
 
+        glEnable(GL_TEXTURE_2D)  # Reativa a textura para o próximo botão
+        
+    glDisable(GL_TEXTURE_2D)
+
     # --- Botão de Iniciar ---
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["iniciar"][1])
+    
     largura_botao_iniciar = largura_tela * 0.2
     altura_botao_iniciar = altura_tela * 0.06
     x_inicio_botao = (largura_tela - largura_botao_iniciar) / 2
     y_inicio_botao = yBot_inicio + 2 * altura_matriz  # Abaixo dos botões de cor
 
-    glColor3f(0.8, 0.8, 0.8)  # Cor do botão
+    glColor3f(1, 1, 1)  # Cor do botão
     glBegin(GL_QUADS)
-    glVertex2f(x_inicio_botao, y_inicio_botao)
-    glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao)
-    glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao + altura_botao_iniciar)
-    glVertex2f(x_inicio_botao, y_inicio_botao + altura_botao_iniciar)
+    glTexCoord2f(0, 0); glVertex2f(x_inicio_botao, y_inicio_botao)
+    glTexCoord2f(1, 0); glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao)
+    glTexCoord2f(1, 1); glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao + altura_botao_iniciar)
+    glTexCoord2f(0, 1); glVertex2f(x_inicio_botao, y_inicio_botao + altura_botao_iniciar)
     glEnd()
+    
+    glDisable(GL_TEXTURE_2D)
 
     # desenhando a grade da matriz
     glColor3f(1, 1, 1)
@@ -220,7 +261,7 @@ def mouse_callback(window, button, action, mods):
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
             consts.coordenadas_obstaculos = [
-                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                [(idx * 5 + 50, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
                 for seg, linha in enumerate(matriz)
             ]
             print("Matriz exportada: ", matriz_exported)
