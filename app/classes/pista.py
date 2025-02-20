@@ -93,12 +93,14 @@ class Pista:
                 glDisable(GL_TEXTURE_2D)
         
         # Desenha obstáculo
-        for seg in consts.coordenadas_obstaculos:
-            for (z, x) in seg:
-                glPushMatrix()
-                consts.obstaculo1.position = glm.vec3(x, 0, z)
-                consts.obstaculo1.desenhar()
-                glPopMatrix()
+        for segmento, coordenadas in consts.segmentos_matrizes.items():
+            deslocamento_z = (segmento - 1) * 100 
+            for linha in coordenadas:  # Itera sobre as linhas (que são listas de coordenadas)
+                for (z, x) in linha:  # Para cada par de coordenadas (z, x)
+                    glPushMatrix()
+                    consts.obstaculo1.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
+                    consts.obstaculo1.desenhar()  # Chama a função de desenhar o obstáculo
+                    glPopMatrix()
             
         if self.texturas:
             glBindTexture(GL_TEXTURE_2D, 0)

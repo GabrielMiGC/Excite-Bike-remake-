@@ -36,7 +36,7 @@ def inicializar_pistas():
     pistas = []
     # Cria uma única pista com 3 texturas diferentes
     pista = Pista(
-        comprimento=5000,
+        comprimento=consts.COMPRIMENTO_PISTA,
         largura=15,
         texturas_path=consts.texturas_pista  # Deve ser uma lista com 3 caminhos de textura
     )

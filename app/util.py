@@ -42,7 +42,7 @@ def desenharMenu(largura_tela, altura_tela):
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
-    largura_matriz = largura_tela * 0.5
+    largura_matriz = largura_tela * 0.8
     altura_matriz = altura_tela * 0.3
     
     x_inicio = (largura_tela - largura_matriz) / 2
@@ -91,6 +91,31 @@ def desenharMenu(largura_tela, altura_tela):
         glEnable(GL_TEXTURE_2D)  # Reativa a textura para o próximo botão
         
     glDisable(GL_TEXTURE_2D)
+    
+     # --- Botões de Avançar e Voltar Segmento ---
+    largura_botao_segmento = largura_tela * 0.12
+    altura_botao_segmento = altura_tela * 0.06
+    x_voltar = (largura_tela / 2) - (largura_botao_segmento * 1.5)
+    x_avancar = (largura_tela / 2) + (largura_botao_segmento * 0.5)
+    y_segmento = y_inicio + altura_matriz + 50  
+
+    # Botão "Voltar" segmento
+    glColor3f(0.8, 0.2, 0.2)  
+    glBegin(GL_QUADS)
+    glVertex2f(x_voltar, y_segmento)
+    glVertex2f(x_voltar + largura_botao_segmento, y_segmento)
+    glVertex2f(x_voltar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glVertex2f(x_voltar, y_segmento + altura_botao_segmento)
+    glEnd()
+
+    # Botão "Avançar" segmento
+    glColor3f(0.2, 0.8, 0.2)  
+    glBegin(GL_QUADS)
+    glVertex2f(x_avancar, y_segmento)
+    glVertex2f(x_avancar + largura_botao_segmento, y_segmento)
+    glVertex2f(x_avancar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glVertex2f(x_avancar, y_segmento + altura_botao_segmento)
+    glEnd()
 
     # --- Botão de Iniciar ---
     glEnable(GL_TEXTURE_2D)
@@ -133,7 +158,7 @@ def desenharMenu(largura_tela, altura_tela):
     # --- Desenhando a Matriz ---
     for i in range(NUM_LINHAS):
         for j in range(NUM_COLUNAS):
-            glColor3f(*consts.matriz_cores[i][j])  # Cor de fundo das células
+            glColor3f(*consts.matriz_cores[consts.segmento_atual][i][j])  # Cor de fundo das células
             x_min = x_inicio + j * celula_largura
             x_max = x_min + celula_largura
             y_min = y_inicio + i * celula_altura
@@ -230,7 +255,6 @@ def key_callback(window, key, scancode, action, mods):
         elif action == glfw.RELEASE:
             consts.movimentando_dir = False
 
-
 def mouse_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS :
         xpos, ypos = glfw.get_cursor_pos(window)
@@ -252,21 +276,25 @@ def mouse_callback(window, button, action, mods):
         # Verifica se o clique está no botão de iniciar
         if x_inicio_botao <= xpos <= x_inicio_botao + largura_botao_iniciar and \
            y_inicio_botao <= ypos <= y_inicio_botao + altura_botao_iniciar:
+                           
             matriz_exported = [
-                [consts.cor_para_numero.get(consts.matriz_cores[i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
                 for i in range(consts.NUM_LINHAS)
             ]            
-            consts.tela = "jogo"
             
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
             consts.coordenadas_obstaculos = [
-                [(idx * 5 + 50, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
                 for seg, linha in enumerate(matriz)
             ]
-            print("Matriz exportada: ", matriz_exported)
-            print("Coordenadas dos obstáculos: ", consts.coordenadas_obstaculos)
+            
+            consts.segmentos_matrizes[consts.segmento_atual] = consts.coordenadas_obstaculos
+            
             print("Mudando para a tela do jogo!")
+            print("Verificando Matriz Completa ", consts.segmentos_matrizes)
+            
+            consts.tela = "jogo"
 
         # Verificar se o clique foi em algum botão
         for i, cor in enumerate(consts.CORES_BOTOES):
@@ -277,12 +305,57 @@ def mouse_callback(window, button, action, mods):
 
             if x_min <= xpos <= x_max and y_min <= ypos <= y_max:
                 consts.botao_selecionado = cor
-                print(f"Cor selecionada: {cor}")
                 return  # Sai da função para evitar trocar célula ao mesmo tempo
 
+        # --- Botões de Avançar e Voltar Segmento ---
+        largura_botao_segmento = largura_janela * 0.12
+        altura_botao_segmento = altura_janela * 0.06
+        x_voltar = (largura_janela / 2) - (largura_botao_segmento * 1.5)
+        x_avancar = (largura_janela / 2) + (largura_botao_segmento * 0.5)
+        y_segmento = ((altura_janela - (altura_janela * 0.3)) / 2) + altura_janela * 0.3 + 50
+        
+        if x_voltar <= xpos <= x_voltar + largura_botao_segmento and \
+              y_segmento <= ypos <= y_segmento + altura_botao_segmento:
+            
+            matriz_exported = [
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                for i in range(consts.NUM_LINHAS)
+            ]            
+            
+            z_values = [2.5, -2.5, -7.5]
+            matriz = np.array(matriz_exported)
+            consts.coordenadas_obstaculos = [
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                for seg, linha in enumerate(matriz)
+            ]
+            
+            consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
+                        
+            consts.segmento_atual = max(1, consts.segmento_atual - 1)
+            print(f"Voltando para o segmento {consts.segmento_atual}")
+            
+        elif x_avancar <= xpos <= x_avancar + largura_botao_segmento and \
+                y_segmento <= ypos <= y_segmento + altura_botao_segmento:
+                                
+            matriz_exported = [
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                for i in range(consts.NUM_LINHAS)
+            ]            
+            
+            z_values = [2.5, -2.5, -7.5]
+            matriz = np.array(matriz_exported)
+            consts.coordenadas_obstaculos = [
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                for seg, linha in enumerate(matriz)
+            ]
+            
+            consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
+                        
+            consts.segmento_atual = min(consts.max_segmento, consts.segmento_atual + 1)
+            print(f"Avançando para o segmento {consts.segmento_atual}")
 
         # Ajuste para coordenadas normalizadas
-        largura_matriz = largura_janela * 0.5  # 50% da largura da tela
+        largura_matriz = largura_janela * 0.8  # 80% da largura da tela
         altura_matriz = altura_janela * 0.3  # 30% da altura da tela
 
         # Posição inicial da matriz (centrada na tela)
@@ -298,7 +371,7 @@ def mouse_callback(window, button, action, mods):
             x = int((xpos - x_inicio) / celula_largura)
             y = int((ypos - y_inicio) / celula_altura)
 
-            consts.matriz_cores[y][x] = consts.botao_selecionado
+            consts.matriz_cores[consts.segmento_atual][y][x] = consts.botao_selecionado
 
 def shading (): #Phong
     # Reflexão do ambiente (Ra = Ia * Ka)
@@ -354,12 +427,14 @@ def converter_posicao_moto():
     return (((consts.positionBike.z + 12) * (7.5 - (-7.5)) / (12 - (-12))) - 7.5)
 
 def calc_colision(posição_jogador):
-    for seg in consts.coordenadas_obstaculos:
-        for (z, x) in seg:
-            if (
-                x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
-                x < converter_posicao_moto() + consts.LARGURA_MOTO and 
-                z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
-            ):
-                return True
+    for segmento, coordenadas in consts.segmentos_matrizes.items():
+        deslocamento_z = (segmento - 1) * 100 
+        for seg in coordenadas:
+            for (z, x) in seg:
+                if (
+                    x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                    x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                    z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                ):
+                    return True
     return False
