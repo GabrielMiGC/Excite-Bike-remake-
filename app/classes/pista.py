@@ -56,10 +56,13 @@ class Pista:
 
     def desenhar(self):
         glColor3f(1, 1, 1)
-        self.offset += self.velocidade
-        if self.offset >= 1000.0:
-            self.offset -= 1000.0
-
+        if not consts.colisao:
+            self.offset += self.velocidade
+            if self.offset >= 1000.0:
+                self.offset -= 1000.0
+        # else:
+        #     self.offset = 0
+        
         # Ajuste dinâmico de segmentos baseado no comprimento da onda
         segments = int(self.comprimento / (self.wave_length / 4))  # 4 segmentos por onda
         delta_z = self.comprimento / segments

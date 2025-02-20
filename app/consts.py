@@ -4,6 +4,9 @@ import glm
 
 movimentando_esq = False
 movimentando_dir = False
+colisao = False
+
+offset_sky = 0.015
 
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)

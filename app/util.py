@@ -436,5 +436,7 @@ def calc_colision(posição_jogador):
                     x < converter_posicao_moto() + consts.LARGURA_MOTO and 
                     z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
                 ):
+                    consts.offset_sky = 0
                     return True
+    consts.offset_sky = 0.015
     return False
