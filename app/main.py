@@ -36,7 +36,7 @@ def inicializar_pistas():
     pistas = []
     # Cria uma única pista com 3 texturas diferentes
     pista = Pista(
-        comprimento=5000,
+        comprimento=consts.COMPRIMENTO_PISTA,
         largura=15,
         texturas_path=consts.texturas_pista  # Deve ser uma lista com 3 caminhos de textura
     )
@@ -57,7 +57,10 @@ def main():
     moto = Moto()
     consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
     
-
+    # Carregar texturar dos botões de criação da pista e iniciar
+    for textura in consts.texturas_botoes.values():
+        textura[1] = util.carregar_textura(textura[0])
+        
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):

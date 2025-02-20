@@ -14,6 +14,21 @@ import numpy as np
 # Crie uma instância global
 camera_state = cam.CameraState()
 
+def carregar_textura(textura_path):
+    img = Image.open(textura_path).convert("RGBA")
+    img_data = np.array(img, dtype=np.uint8)
+    width, height = img.size
+
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+
+    return texture_id
+
 def desenharMenu(largura_tela, altura_tela):
     
     NUM_LINHAS = consts.NUM_LINHAS
@@ -27,7 +42,7 @@ def desenharMenu(largura_tela, altura_tela):
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
-    largura_matriz = largura_tela * 0.5
+    largura_matriz = largura_tela * 0.8
     altura_matriz = altura_tela * 0.3
     
     x_inicio = (largura_tela - largura_matriz) / 2
@@ -43,32 +58,83 @@ def desenharMenu(largura_tela, altura_tela):
     yBot_inicio = y_inicio - altura_botao - 20  # Espaço acima da matriz
 
     # --- Desenhar os botões de criação de objetos ---
+    glEnable(GL_TEXTURE_2D)
     for i, cor in enumerate(consts.CORES_BOTOES):
-        glColor3f(*cor)
-        glBegin(GL_QUADS)
+        glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes.get(f"obs{i+1}")[1])
+        glColor3f(1, 1, 1)  # Cor do botão
+        
         x_min = xBot_inicio + i * (largura_botao + espaco_botao)
         x_max = x_min + largura_botao
         y_min = yBot_inicio
         y_max = yBot_inicio + altura_botao
+        
+        # Desenha o botão com textura
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(x_min, y_min)
+        glTexCoord2f(1, 0); glVertex2f(x_max, y_min)
+        glTexCoord2f(1, 1); glVertex2f(x_max, y_max)
+        glTexCoord2f(0, 1); glVertex2f(x_min, y_max)
+        glEnd()
+        
+        # Desenha a borda colorida
+        glDisable(GL_TEXTURE_2D)  # Desativa textura para a borda
+        glColor3f(*cor)  # Define a cor da borda
+        glLineWidth(5)  # Define a espessura da borda
+
+        glBegin(GL_LINE_LOOP)
         glVertex2f(x_min, y_min)
         glVertex2f(x_max, y_min)
         glVertex2f(x_max, y_max)
         glVertex2f(x_min, y_max)
         glEnd()
 
+        glEnable(GL_TEXTURE_2D)  # Reativa a textura para o próximo botão
+        
+    glDisable(GL_TEXTURE_2D)
+    
+     # --- Botões de Avançar e Voltar Segmento ---
+    largura_botao_segmento = largura_tela * 0.12
+    altura_botao_segmento = altura_tela * 0.06
+    x_voltar = (largura_tela / 2) - (largura_botao_segmento * 1.5)
+    x_avancar = (largura_tela / 2) + (largura_botao_segmento * 0.5)
+    y_segmento = y_inicio + altura_matriz + 50  
+
+    # Botão "Voltar" segmento
+    glColor3f(0.8, 0.2, 0.2)  
+    glBegin(GL_QUADS)
+    glVertex2f(x_voltar, y_segmento)
+    glVertex2f(x_voltar + largura_botao_segmento, y_segmento)
+    glVertex2f(x_voltar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glVertex2f(x_voltar, y_segmento + altura_botao_segmento)
+    glEnd()
+
+    # Botão "Avançar" segmento
+    glColor3f(0.2, 0.8, 0.2)  
+    glBegin(GL_QUADS)
+    glVertex2f(x_avancar, y_segmento)
+    glVertex2f(x_avancar + largura_botao_segmento, y_segmento)
+    glVertex2f(x_avancar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glVertex2f(x_avancar, y_segmento + altura_botao_segmento)
+    glEnd()
+
     # --- Botão de Iniciar ---
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["iniciar"][1])
+    
     largura_botao_iniciar = largura_tela * 0.2
     altura_botao_iniciar = altura_tela * 0.06
     x_inicio_botao = (largura_tela - largura_botao_iniciar) / 2
     y_inicio_botao = yBot_inicio + 2 * altura_matriz  # Abaixo dos botões de cor
 
-    glColor3f(0.8, 0.8, 0.8)  # Cor do botão
+    glColor3f(1, 1, 1)  # Cor do botão
     glBegin(GL_QUADS)
-    glVertex2f(x_inicio_botao, y_inicio_botao)
-    glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao)
-    glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao + altura_botao_iniciar)
-    glVertex2f(x_inicio_botao, y_inicio_botao + altura_botao_iniciar)
+    glTexCoord2f(0, 0); glVertex2f(x_inicio_botao, y_inicio_botao)
+    glTexCoord2f(1, 0); glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao)
+    glTexCoord2f(1, 1); glVertex2f(x_inicio_botao + largura_botao_iniciar, y_inicio_botao + altura_botao_iniciar)
+    glTexCoord2f(0, 1); glVertex2f(x_inicio_botao, y_inicio_botao + altura_botao_iniciar)
     glEnd()
+    
+    glDisable(GL_TEXTURE_2D)
 
     # desenhando a grade da matriz
     glColor3f(1, 1, 1)
@@ -92,7 +158,7 @@ def desenharMenu(largura_tela, altura_tela):
     # --- Desenhando a Matriz ---
     for i in range(NUM_LINHAS):
         for j in range(NUM_COLUNAS):
-            glColor3f(*consts.matriz_cores[i][j])  # Cor de fundo das células
+            glColor3f(*consts.matriz_cores[consts.segmento_atual][i][j])  # Cor de fundo das células
             x_min = x_inicio + j * celula_largura
             x_max = x_min + celula_largura
             y_min = y_inicio + i * celula_altura
@@ -189,7 +255,6 @@ def key_callback(window, key, scancode, action, mods):
         elif action == glfw.RELEASE:
             consts.movimentando_dir = False
 
-
 def mouse_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS :
         xpos, ypos = glfw.get_cursor_pos(window)
@@ -211,11 +276,11 @@ def mouse_callback(window, button, action, mods):
         # Verifica se o clique está no botão de iniciar
         if x_inicio_botao <= xpos <= x_inicio_botao + largura_botao_iniciar and \
            y_inicio_botao <= ypos <= y_inicio_botao + altura_botao_iniciar:
+                           
             matriz_exported = [
-                [consts.cor_para_numero.get(consts.matriz_cores[i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
                 for i in range(consts.NUM_LINHAS)
             ]            
-            consts.tela = "jogo"
             
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
@@ -223,9 +288,13 @@ def mouse_callback(window, button, action, mods):
                 [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
                 for seg, linha in enumerate(matriz)
             ]
-            print("Matriz exportada: ", matriz_exported)
-            print("Coordenadas dos obstáculos: ", consts.coordenadas_obstaculos)
+            
+            consts.segmentos_matrizes[consts.segmento_atual] = consts.coordenadas_obstaculos
+            
             print("Mudando para a tela do jogo!")
+            print("Verificando Matriz Completa ", consts.segmentos_matrizes)
+            
+            consts.tela = "jogo"
 
         # Verificar se o clique foi em algum botão
         for i, cor in enumerate(consts.CORES_BOTOES):
@@ -236,12 +305,57 @@ def mouse_callback(window, button, action, mods):
 
             if x_min <= xpos <= x_max and y_min <= ypos <= y_max:
                 consts.botao_selecionado = cor
-                print(f"Cor selecionada: {cor}")
                 return  # Sai da função para evitar trocar célula ao mesmo tempo
 
+        # --- Botões de Avançar e Voltar Segmento ---
+        largura_botao_segmento = largura_janela * 0.12
+        altura_botao_segmento = altura_janela * 0.06
+        x_voltar = (largura_janela / 2) - (largura_botao_segmento * 1.5)
+        x_avancar = (largura_janela / 2) + (largura_botao_segmento * 0.5)
+        y_segmento = ((altura_janela - (altura_janela * 0.3)) / 2) + altura_janela * 0.3 + 50
+        
+        if x_voltar <= xpos <= x_voltar + largura_botao_segmento and \
+              y_segmento <= ypos <= y_segmento + altura_botao_segmento:
+            
+            matriz_exported = [
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                for i in range(consts.NUM_LINHAS)
+            ]            
+            
+            z_values = [2.5, -2.5, -7.5]
+            matriz = np.array(matriz_exported)
+            consts.coordenadas_obstaculos = [
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                for seg, linha in enumerate(matriz)
+            ]
+            
+            consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
+                        
+            consts.segmento_atual = max(1, consts.segmento_atual - 1)
+            print(f"Voltando para o segmento {consts.segmento_atual}")
+            
+        elif x_avancar <= xpos <= x_avancar + largura_botao_segmento and \
+                y_segmento <= ypos <= y_segmento + altura_botao_segmento:
+                                
+            matriz_exported = [
+                [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
+                for i in range(consts.NUM_LINHAS)
+            ]            
+            
+            z_values = [2.5, -2.5, -7.5]
+            matriz = np.array(matriz_exported)
+            consts.coordenadas_obstaculos = [
+                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
+                for seg, linha in enumerate(matriz)
+            ]
+            
+            consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
+                        
+            consts.segmento_atual = min(consts.max_segmento, consts.segmento_atual + 1)
+            print(f"Avançando para o segmento {consts.segmento_atual}")
 
         # Ajuste para coordenadas normalizadas
-        largura_matriz = largura_janela * 0.5  # 50% da largura da tela
+        largura_matriz = largura_janela * 0.8  # 80% da largura da tela
         altura_matriz = altura_janela * 0.3  # 30% da altura da tela
 
         # Posição inicial da matriz (centrada na tela)
@@ -257,7 +371,7 @@ def mouse_callback(window, button, action, mods):
             x = int((xpos - x_inicio) / celula_largura)
             y = int((ypos - y_inicio) / celula_altura)
 
-            consts.matriz_cores[y][x] = consts.botao_selecionado
+            consts.matriz_cores[consts.segmento_atual][y][x] = consts.botao_selecionado
 
 def shading (): #Phong
     # Reflexão do ambiente (Ra = Ia * Ka)
@@ -313,14 +427,16 @@ def converter_posicao_moto():
     return (((consts.positionBike.z + 12) * (7.5 - (-7.5)) / (12 - (-12))) - 7.5)
 
 def calc_colision(posição_jogador):
-    for seg in consts.coordenadas_obstaculos:
-        for (z, x) in seg:
-            if (
-                x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
-                x < converter_posicao_moto() + consts.LARGURA_MOTO and 
-                z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
-            ):
-                consts.offset_sky = 0
-                return True
+    for segmento, coordenadas in consts.segmentos_matrizes.items():
+        deslocamento_z = (segmento - 1) * 100 
+        for seg in coordenadas:
+            for (z, x) in seg:
+                if (
+                    x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                    x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                    z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                ):
+                    consts.offset_sky = 0
+                    return True
     consts.offset_sky = 0.015
     return False

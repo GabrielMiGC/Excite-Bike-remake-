@@ -11,8 +11,12 @@ offset_sky = 0.015
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)
 
+COMPRIMENTO_PISTA = 300
+
 NUM_LINHAS = 3
-NUM_COLUNAS = 10
+NUM_COLUNAS = 20
+segmento_atual = 1
+max_segmento = COMPRIMENTO_PISTA/100
 
 LARGURA_MOTO = 0.6
 LARGURA_OBSTACULO = 5
@@ -24,6 +28,13 @@ CORES_BOTOES = [
     (0.0, 0.0, 1.0)   # Azul
 ]
 
+texturas_botoes = {
+    "obs1" : [os.path.join("textures", "obs1.png"), 0],
+    "obs2" : [os.path.join("textures", "obs1.png"), 0],
+    "obs3" : [os.path.join("textures", "obs1.png"), 0],
+    "iniciar" : [os.path.join("textures", "iniciar.png"), 0],
+}
+
 cor_para_numero = {
     (0.1, 0.1, 0.1): 0,
     (1.0, 0.0, 0.0): 1,  # Vermelho
@@ -31,8 +42,11 @@ cor_para_numero = {
     (0.0, 0.0, 1.0): 3   # Azul
 }
 
-matriz_cores = [[(0.1, 0.1, 0.1) for _ in range(NUM_COLUNAS)] for _ in range(NUM_LINHAS)]  # Branco por padrão
+matriz_cores = {
+    chave: [[(0.1, 0.1, 0.1) for _ in range(NUM_COLUNAS)] for _ in range(NUM_LINHAS)] for chave in range(1, int(max_segmento + 1))   # Branco por padrão
+}
 
+segmentos_matrizes = {}
 coordenadas_obstaculos = []
 obstaculo1 = None
 
