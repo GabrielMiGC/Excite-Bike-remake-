@@ -11,6 +11,7 @@ class Pista:
     def __init__(self, comprimento, largura, texturas_path):
         self.comprimento = comprimento
         self.largura = largura
+        print(texturas_path)
         self.texturas = [self.carregar_textura(t) for t in texturas_path]  # Lista de texturas
         self.velocidade = 0.1
         self.offset = 0.0
@@ -97,13 +98,13 @@ class Pista:
         
         # Desenha obstáculo
         for segmento, coordenadas in consts.segmentos_matrizes.items():
-            deslocamento_z = (segmento - 1) * 100 
-            for linha in coordenadas:  # Itera sobre as linhas (que são listas de coordenadas)
-                for (z, x) in linha:  # Para cada par de coordenadas (z, x)
-                    glPushMatrix()
-                    consts.obstaculo1.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
-                    consts.obstaculo1.desenhar()  # Chama a função de desenhar o obstáculo
-                    glPopMatrix()
+            deslocamento_z = (segmento - 1) 
+            for (z, x) in coordenadas:  # Itera diretamente sobre as tuplas (z, x)
+                glPushMatrix()
+                consts.obstaculo1[segmento - 1].position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
+                consts.obstaculo1[segmento - 1].desenhar()  # Chama a função de desenhar o obstáculo
+                glPopMatrix()
+
             
         if self.texturas:
             glBindTexture(GL_TEXTURE_2D, 0)

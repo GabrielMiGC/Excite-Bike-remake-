@@ -48,7 +48,7 @@ matriz_cores = {
 
 segmentos_matrizes = {}
 coordenadas_obstaculos = []
-obstaculo1 = None
+obstaculo1 = []
 
 positionBike = glm.vec3(0.0, 0.0, 0.0)
 

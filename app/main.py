@@ -2,6 +2,7 @@ import glfw
 from classes.pista import Pista
 from classes.moto import Moto
 from classes.obstaculos import *
+from classes.carro import *
 from classes.skybox import Skybox
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -28,7 +29,9 @@ def inicializar_glfw():
 
     glfw.make_context_current(window)
     glEnable(GL_DEPTH_TEST)
+    #glDepthFunc(GL_LEQUAL)
     glEnable(GL_TEXTURE_2D)
+    
     return window, largura_tela, altura_tela
 
 
@@ -55,8 +58,9 @@ def main():
 
     pistas = inicializar_pistas()
     moto = Moto()
-    consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
     
+    #consts.carro1 = Carro(0, 0, 5, 1.5)
+
     # Carregar texturar dos botões de criação da pista e iniciar
     for textura in consts.texturas_botoes.values():
         textura[1] = util.carregar_textura(textura[0])
@@ -71,6 +75,11 @@ def main():
         
         if consts.tela == "criacao":
             util.desenharMenu(largura_tela, altura_tela)
+            #cria todos os obstaculos
+            consts.obstaculo1.append(Obstaculos(0, 0, 2, 1.5,position=None, textura="barrier.png", modelo="barrieryConcret.obj"))
+            consts.obstaculo1.append(Obstaculos(0, 0, 2, 1.5,position=None, textura="barrier1.png", modelo="Stone.obj"))
+            consts.obstaculo1.append(Obstaculos(0, 0, 2, 1.5,position=None, textura="barrier2.png", modelo="Car.obj"))
+
         elif consts.tela == "jogo":
             consts.colisao = util.calc_colision(posicao_jogador)
             if consts.colisao:

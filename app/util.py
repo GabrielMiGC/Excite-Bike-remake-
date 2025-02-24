@@ -280,20 +280,26 @@ def mouse_callback(window, button, action, mods):
             matriz_exported = [
                 [consts.cor_para_numero.get(consts.matriz_cores[consts.segmento_atual][i][j], -1) for j in range(consts.NUM_COLUNAS)]
                 for i in range(consts.NUM_LINHAS)
-            ]            
-            
+            ]
+            #modifiquei esta parte, possivelmente esta afetando o desempenho (revisar)            
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
-            consts.coordenadas_obstaculos = [
-                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
-                for seg, linha in enumerate(matriz)
-            ]
-            
-            consts.segmentos_matrizes[consts.segmento_atual] = consts.coordenadas_obstaculos
-            
+            for seg, linha in enumerate(matriz):
+                for idx, val in enumerate(linha):
+                    if val in (1, 2, 3):
+                        chave = int(val)
+                        coord = (idx * 5, z_values[seg])
+                        
+                        # Adicionar sempre à lista completa de coordenadas
+                        consts.coordenadas_obstaculos.append(coord)
+                        
+                        # Adicionar à estrutura de segmentos, organizando por chave corretamente
+                        if chave not in consts.segmentos_matrizes:
+                            consts.segmentos_matrizes[chave] = []
+                        consts.segmentos_matrizes[chave].append(coord)
+
             print("Mudando para a tela do jogo!")
             print("Verificando Matriz Completa ", consts.segmentos_matrizes)
-            
             consts.tela = "jogo"
 
         # Verificar se o clique foi em algum botão
@@ -428,15 +434,17 @@ def converter_posicao_moto():
 
 def calc_colision(posição_jogador):
     for segmento, coordenadas in consts.segmentos_matrizes.items():
-        deslocamento_z = (segmento - 1) * 100 
-        for seg in coordenadas:
-            for (z, x) in seg:
-                if (
-                    x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
-                    x < converter_posicao_moto() + consts.LARGURA_MOTO and 
-                    z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
-                ):
-                    consts.offset_sky = 0
-                    return True
+        
+        
+        # Iterar diretamente pelas coordenadas
+        for z, x in coordenadas:
+            if (
+                x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                z + 0 == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+            ):
+                consts.offset_sky = 0
+                return True
+    
     consts.offset_sky = 0.015
     return False
