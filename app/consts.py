@@ -20,8 +20,10 @@ max_segmento = COMPRIMENTO_PISTA/100
 
 LARGURA_MOTO = 0.6
 LARGURA_OBSTACULO = 5
+LARGURA_OBSTACULO_MENOR = 2.5
 COMPRIMENTO_MOTO = 1.75
 COMPRIMENTO_OBSTACULO = 10
+COMPRIMENTO_OBSTACULO_MENOR = 2.5
 
 CORES_BOTOES = [
     (1.0, 0.0, 0.0),  # Vermelho
@@ -31,9 +33,11 @@ CORES_BOTOES = [
 
 texturas_botoes = {
     "obs1" : [os.path.join("textures", "obs1.png"), 0],
-    "obs2" : [os.path.join("textures", "obs1.png"), 0],
-    "obs3" : [os.path.join("textures", "obs1.png"), 0],
+    "obs2" : [os.path.join("textures", "obs2.png"), 0],
+    "obs3" : [os.path.join("textures", "obs3.png"), 0],
     "iniciar" : [os.path.join("textures", "iniciar.png"), 0],
+    "prox" : [os.path.join("textures", "proximo_seg.png"), 0],
+    "ant" : [os.path.join("textures", "anterior_seg.png"), 0],
 }
 
 cor_para_numero = {
