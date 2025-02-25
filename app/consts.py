@@ -31,6 +31,10 @@ CORES_BOTOES = [
     (0.0, 0.0, 1.0)   # Azul
 ]
 
+NUM_VIDAS = 3
+VIDAS = [1 for _ in range(NUM_VIDAS)]
+posicoes_perda_vida = set()  # Guarda as posições onde a vida foi retirada
+
 texturas_botoes = {
     "obs1" : [os.path.join("textures", "obs1.png"), 0],
     "obs2" : [os.path.join("textures", "obs2.png"), 0],
@@ -38,6 +42,10 @@ texturas_botoes = {
     "iniciar" : [os.path.join("textures", "iniciar.png"), 0],
     "prox" : [os.path.join("textures", "proximo_seg.png"), 0],
     "ant" : [os.path.join("textures", "anterior_seg.png"), 0],
+    "Vidas": [
+        [os.path.join("textures", "Sem.png"), 0], 
+        [os.path.join("textures", "Tem.png"), 0]
+    ]
 }
 
 cor_para_numero = {
