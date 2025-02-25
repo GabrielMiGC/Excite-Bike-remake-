@@ -283,10 +283,13 @@ def mouse_callback(window, button, action, mods):
             ]            
             
             z_values = [2.5, -2.5, -7.5]
-            matriz = np.array(matriz_exported)
+            matriz = np.array(matriz_exported)            
             consts.coordenadas_obstaculos = [
-                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
-                for seg, linha in enumerate(matriz)
+                [
+                    [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == tipo]  
+                    for seg, linha in enumerate(matriz)
+                ]
+                for tipo in [1, 2, 3]
             ]
             
             consts.segmentos_matrizes[consts.segmento_atual] = consts.coordenadas_obstaculos
@@ -416,6 +419,41 @@ def load_obj(filename):
 
     return vertices, textures, normals, faces
 
+def load_obj_car(filename):
+    vertices = []
+    textures = []
+    normals = []
+    faces = []
+    current_material = None
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('v '):  # Linha de vértice
+                parts = line.split()
+                vertex = list(map(float, parts[1:4]))
+                vertices.append(vertex)
+            elif line.startswith('vt '):  # Linha de textura
+                parts = line.split()
+                texture = list(map(float, parts[1:3]))
+                textures.append(texture)
+            elif line.startswith('vn '):  # Linha de normal
+                parts = line.split()
+                normal = list(map(float, parts[1:4]))
+                normals.append(normal)
+            elif line.startswith('usemtl '):  # Linha de material
+                parts = line.split()
+                current_material = parts[1]
+            elif line.startswith('f '):  # Linha de face
+                parts = line.split()
+                face = []
+                for part in parts[1:]:
+                    vals = part.split('//')
+                    vertex_index = int(vals[0]) - 1
+                    face.append((vertex_index, current_material))
+                faces.append(face)
+
+    return vertices, textures, normals, faces
+
 def update_movimento(movimentando_esq, movimentando_dir):
     if movimentando_esq:
         consts.positionBike.z = glm.clamp(consts.positionBike.z + 0.2, -12, 12)
@@ -427,16 +465,51 @@ def converter_posicao_moto():
     return (((consts.positionBike.z + 12) * (7.5 - (-7.5)) / (12 - (-12))) - 7.5)
 
 def calc_colision(posição_jogador):
-    for segmento, coordenadas in consts.segmentos_matrizes.items():
-        deslocamento_z = (segmento - 1) * 100 
-        for seg in coordenadas:
-            for (z, x) in seg:
-                if (
-                    x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
-                    x < converter_posicao_moto() + consts.LARGURA_MOTO and 
-                    z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
-                ):
-                    consts.offset_sky = 0
-                    return True
+    for segmento, coordenadas_pista in consts.segmentos_matrizes.items():
+        for tipo_obstaculo, coordenadas_raias in enumerate(coordenadas_pista, start=1):
+            deslocamento_z = (segmento - 1) * 100 
+            for raia in coordenadas_raias:  # Itera sobre as raias 
+                for (z, x) in raia:
+                    if (tipo_obstaculo == 1): # Barreira
+                        if (
+                            x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                            x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                            z + deslocamento_z == (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                        ):
+                            consts.offset_sky = 0
+                            return True
+                    elif (tipo_obstaculo == 2): # Carro
+                        if (
+                            x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
+                            x < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                            z + deslocamento_z + consts.COMPRIMENTO_OBSTACULO > (posição_jogador + 6 - consts.COMPRIMENTO_MOTO) and 
+                            z + deslocamento_z < (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                        ):
+                            consts.offset_sky = 0
+                            print('gameover') # Game Over
+                            return True
+                    elif (tipo_obstaculo == 3): # Pedra
+                        pass
+    print('não colisão')
     consts.offset_sky = 0.015
     return False
+
+        # for segmento, coordenadas in consts.segmentos_matrizes.items():
+        #     deslocamento_z = (segmento - 1) * 100 
+        #     for linha in coordenadas:  # Itera sobre as linhas (que são listas de coordenadas)
+        #         for (z, x) in linha:  # Para cada par de coordenadas (z, x)
+        #             glPushMatrix()
+        #             consts.obstaculo1.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
+        #             consts.obstaculo1.desenhar()  # Chama a função de desenhar o obstáculo
+        #             glPopMatrix()
+        
+        # for segmento, coordenadas_pista in consts.segmentos_matrizes.items():
+        #     for tipo_obstaculo, coordenadas_raias in enumerate(coordenadas_pista, start=1):
+        #         deslocamento_z = (segmento - 1) * 100 
+        #         for raia in coordenadas_raias:  # Itera sobre as raias 
+        #             for (z, x) in raia:  # Para cada par de coordenadas (z, x)
+        #                 glPushMatrix()
+        #                 obstaculo = getattr(consts, f"obstaculo{tipo_obstaculo}")
+        #                 obstaculo.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
+        #                 obstaculo.desenhar()  # Chama a função de desenhar o obstáculo
+        #                 glPopMatrix()

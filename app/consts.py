@@ -21,6 +21,7 @@ max_segmento = COMPRIMENTO_PISTA/100
 LARGURA_MOTO = 0.6
 LARGURA_OBSTACULO = 5
 COMPRIMENTO_MOTO = 1.75
+COMPRIMENTO_OBSTACULO = 10
 
 CORES_BOTOES = [
     (1.0, 0.0, 0.0),  # Vermelho
@@ -49,6 +50,8 @@ matriz_cores = {
 segmentos_matrizes = {}
 coordenadas_obstaculos = []
 obstaculo1 = None
+obstaculo2 = None
+obstaculo3 = None
 
 positionBike = glm.vec3(0.0, 0.0, 0.0)
 

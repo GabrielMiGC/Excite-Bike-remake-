@@ -2,6 +2,7 @@ import glfw
 from classes.pista import Pista
 from classes.moto import Moto
 from classes.obstaculos import *
+from classes.carro import *
 from classes.skybox import Skybox
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -56,6 +57,7 @@ def main():
     pistas = inicializar_pistas()
     moto = Moto()
     consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
+    consts.obstaculo2 = Carro(0, 0, 5, 1.5)
     
     # Carregar texturar dos botões de criação da pista e iniciar
     for textura in consts.texturas_botoes.values():
@@ -64,7 +66,6 @@ def main():
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):
-        # print(f"Frame renderizado - posição do jogador: {posicao_jogador}")
         glfw.poll_events()
         util.update_movimento(consts.movimentando_esq, consts.movimentando_dir) # movimento da moto
         sky.update_offset(consts.offset_sky)  # Update the offset for the side faces
