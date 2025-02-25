@@ -62,8 +62,13 @@ def main():
     consts.obstaculo3 = Pedra(0, 0, 5, 1.5)
     
     # Carregar texturar dos botões de criação da pista e iniciar
-    for textura in consts.texturas_botoes.values():
-        textura[1] = util.carregar_textura(textura[0])
+    for chave, textura in consts.texturas_botoes.items():
+        if chave == "Vidas":
+            for vida in textura:
+                vida[1] = util.carregar_textura(vida[0])  # Carrega a textura e armazena no índice [1]
+        else:
+            textura[1] = util.carregar_textura(textura[0])
+
         
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
@@ -80,7 +85,7 @@ def main():
                 print("Colisão detectada!")
             else:
                 posicao_jogador += 0.25
-            util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto)
+            util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto, largura_tela, altura_tela)
         glfw.swap_buffers(window)
     glfw.terminate()
     

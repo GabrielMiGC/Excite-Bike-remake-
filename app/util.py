@@ -181,7 +181,7 @@ def desenharMenu(largura_tela, altura_tela):
             glVertex2f(x_min, y_max)
             glEnd()
 
-def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera, moto):
+def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera, moto, largura_tela, altura_tela):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(50, 1440 / 1040, 0.1, 100)
@@ -244,6 +244,61 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     glTranslatef(0, 0, posicao_jogador + 10)
     skybox.draw_cube()
     glPopMatrix()
+    
+    # Habilitando modo 2D para desenhar as vidas
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, largura_tela, altura_tela, 0, -1, 1)  # Define coordenadas da tela
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    glDisable(GL_DEPTH_TEST)
+
+    # Desenha as vidas no canto superior esquerdo
+    vida_tamanho = 50  # Tamanho do ícone de vida
+    vida_espaco = 10   # Espaço entre as vidas
+    fundo_margem = 15   # Margem extra para o fundo ser maior
+
+    num_vidas = len(consts.VIDAS)
+    largura_fundo = num_vidas * vida_tamanho + (num_vidas - 1) * vida_espaco + 2 * fundo_margem
+    altura_fundo = vida_tamanho + 2 * fundo_margem
+
+    x_fundo = 20 - fundo_margem  # Posição inicial do fundo
+    y_fundo = 20 - fundo_margem 
+    
+    # Desenha um único retângulo de fundo
+    glColor3f(1, 1, 1)  # Cor do fundo (branco)
+    glBegin(GL_QUADS)
+    glVertex2f(x_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo + altura_fundo)
+    glVertex2f(x_fundo, y_fundo + altura_fundo)
+    glEnd()
+    
+    # Desenha as vidas sobre o fundo
+    for index, i in enumerate(consts.VIDAS):
+        x = 20 + index * (vida_tamanho + vida_espaco)  # Posição na tela
+        y = 20  # Posição no topo da tela
+        
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["Vidas"][i][1])
+        
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(x, y)  # Canto superior esquerdo
+        glTexCoord2f(1, 0); glVertex2f(x + vida_tamanho, y)  # Canto superior direito
+        glTexCoord2f(1, 1); glVertex2f(x + vida_tamanho, y + vida_tamanho)  # Canto inferior direito
+        glTexCoord2f(0, 1); glVertex2f(x, y + vida_tamanho)  # Canto inferior esquerdo
+        glEnd()
+        
+        glDisable(GL_TEXTURE_2D)
+
+    # Restaurar matriz de projeção
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glEnable(GL_DEPTH_TEST)
 
 def lerp(a, b, t):
     return a + (b - a) * t
@@ -506,7 +561,20 @@ def calc_colision(posição_jogador):
                             z + deslocamento_z < (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
                         ):
                             consts.offset_sky = 0
-                            print('perde vida') # Perde vida
+                            
+                            if posição_jogador not in consts.posicoes_perda_vida:  # Verifica se já perdeu vida nessa posição
+                                consts.posicoes_perda_vida.add(posição_jogador)  # Registra a posição
+
+                                # Percorre o vetor de trás para frente e troca o último 1 por 0
+                                for i in range(len(consts.VIDAS) - 1, -1, -1):
+                                    if consts.VIDAS[i] == 1:
+                                        consts.VIDAS[i] = 0
+                                        break  # Para no primeiro 1 encontrado
+                                    
+                                # Verifica se não há mais vidas
+                                if sum(consts.VIDAS) == 0:  # Se a soma for 0, significa que todas as vidas foram perdidas
+                                    consts.tela = "game_over"  # Muda para a tela de game over
+                            
                             return True
     print('não colisão')
     consts.offset_sky = 0.015
