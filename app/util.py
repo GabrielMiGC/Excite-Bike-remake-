@@ -100,22 +100,32 @@ def desenharMenu(largura_tela, altura_tela):
     y_segmento = y_inicio + altura_matriz + 50  
 
     # Botão "Voltar" segmento
-    glColor3f(0.8, 0.2, 0.2)  
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["ant"][1])
+    
+    glColor3f(1, 1, 1)  
     glBegin(GL_QUADS)
-    glVertex2f(x_voltar, y_segmento)
-    glVertex2f(x_voltar + largura_botao_segmento, y_segmento)
-    glVertex2f(x_voltar + largura_botao_segmento, y_segmento + altura_botao_segmento)
-    glVertex2f(x_voltar, y_segmento + altura_botao_segmento)
+    glTexCoord2f(0, 0); glVertex2f(x_voltar, y_segmento)
+    glTexCoord2f(1, 0); glVertex2f(x_voltar + largura_botao_segmento, y_segmento)
+    glTexCoord2f(1, 1); glVertex2f(x_voltar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glTexCoord2f(0, 1); glVertex2f(x_voltar, y_segmento + altura_botao_segmento)
     glEnd()
+    
+    glDisable(GL_TEXTURE_2D)
 
     # Botão "Avançar" segmento
-    glColor3f(0.2, 0.8, 0.2)  
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["prox"][1])
+    
+    glColor3f(1, 1, 1)  
     glBegin(GL_QUADS)
-    glVertex2f(x_avancar, y_segmento)
-    glVertex2f(x_avancar + largura_botao_segmento, y_segmento)
-    glVertex2f(x_avancar + largura_botao_segmento, y_segmento + altura_botao_segmento)
-    glVertex2f(x_avancar, y_segmento + altura_botao_segmento)
+    glTexCoord2f(0, 0); glVertex2f(x_avancar, y_segmento)
+    glTexCoord2f(1, 0); glVertex2f(x_avancar + largura_botao_segmento, y_segmento)
+    glTexCoord2f(1, 1); glVertex2f(x_avancar + largura_botao_segmento, y_segmento + altura_botao_segmento)
+    glTexCoord2f(0, 1); glVertex2f(x_avancar, y_segmento + altura_botao_segmento)
     glEnd()
+    
+    glDisable(GL_TEXTURE_2D)
 
     # --- Botão de Iniciar ---
     glEnable(GL_TEXTURE_2D)
@@ -483,33 +493,21 @@ def calc_colision(posição_jogador):
                             x + consts.LARGURA_OBSTACULO > converter_posicao_moto() - consts.LARGURA_MOTO and 
                             x < converter_posicao_moto() + consts.LARGURA_MOTO and 
                             z + deslocamento_z + consts.COMPRIMENTO_OBSTACULO > (posição_jogador + 6 - consts.COMPRIMENTO_MOTO) and 
-                            z + deslocamento_z < (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                            z + deslocamento_z <= (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
                         ):
                             consts.offset_sky = 0
                             print('gameover') # Game Over
                             return True
                     elif (tipo_obstaculo == 3): # Pedra
-                        pass
+                        if (
+                            x + 5 - consts.LARGURA_OBSTACULO_MENOR/2 > converter_posicao_moto() - consts.LARGURA_MOTO and  # x representa o inicio da raia, a largura da raia é 5 e o obstaculo está posicionado no meio
+                            x + consts.LARGURA_OBSTACULO_MENOR/2 < converter_posicao_moto() + consts.LARGURA_MOTO and 
+                            z + deslocamento_z + consts.COMPRIMENTO_OBSTACULO_MENOR > (posição_jogador + 6 - consts.COMPRIMENTO_MOTO) and 
+                            z + deslocamento_z < (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
+                        ):
+                            consts.offset_sky = 0
+                            print('perde vida') # Perde vida
+                            return True
     print('não colisão')
     consts.offset_sky = 0.015
     return False
-
-        # for segmento, coordenadas in consts.segmentos_matrizes.items():
-        #     deslocamento_z = (segmento - 1) * 100 
-        #     for linha in coordenadas:  # Itera sobre as linhas (que são listas de coordenadas)
-        #         for (z, x) in linha:  # Para cada par de coordenadas (z, x)
-        #             glPushMatrix()
-        #             consts.obstaculo1.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
-        #             consts.obstaculo1.desenhar()  # Chama a função de desenhar o obstáculo
-        #             glPopMatrix()
-        
-        # for segmento, coordenadas_pista in consts.segmentos_matrizes.items():
-        #     for tipo_obstaculo, coordenadas_raias in enumerate(coordenadas_pista, start=1):
-        #         deslocamento_z = (segmento - 1) * 100 
-        #         for raia in coordenadas_raias:  # Itera sobre as raias 
-        #             for (z, x) in raia:  # Para cada par de coordenadas (z, x)
-        #                 glPushMatrix()
-        #                 obstaculo = getattr(consts, f"obstaculo{tipo_obstaculo}")
-        #                 obstaculo.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
-        #                 obstaculo.desenhar()  # Chama a função de desenhar o obstáculo
-        #                 glPopMatrix()

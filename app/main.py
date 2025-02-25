@@ -1,7 +1,8 @@
 import glfw
 from classes.pista import Pista
 from classes.moto import Moto
-from classes.obstaculos import *
+from classes.barreira import *
+from classes.stone import *
 from classes.carro import *
 from classes.skybox import Skybox
 from OpenGL.GL import *
@@ -56,8 +57,9 @@ def main():
 
     pistas = inicializar_pistas()
     moto = Moto()
-    consts.obstaculo1 = Obstaculos(0, 0, 5, 1.5)
+    consts.obstaculo1 = Barreira(0, 0, 5, 1.5)
     consts.obstaculo2 = Carro(0, 0, 5, 1.5)
+    consts.obstaculo3 = Pedra(0, 0, 5, 1.5)
     
     # Carregar texturar dos botões de criação da pista e iniciar
     for textura in consts.texturas_botoes.values():

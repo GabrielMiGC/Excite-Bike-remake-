@@ -1,10 +1,9 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from classes.obstaculos import *
+from classes.barreira import *
 from util import shading, load_obj
 import glm
 import consts
-
 
 class Moto:
     def __init__(self):

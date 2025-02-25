@@ -45,9 +45,3 @@ class Carro:
             glEnd()
 
         glPopMatrix()
-        
-    def calc_colision(self, player):
-        """Calcula a colisão entre o jogador e a barreira."""
-        # posição da moto varia de -12 a 12, a pista varia de -5 a 5
-        return (player.x > self.position.x and
-                player.x < self.position.x + self.largura)
