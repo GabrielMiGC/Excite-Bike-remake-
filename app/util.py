@@ -245,6 +245,53 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     skybox.draw_cube()
     glPopMatrix()
 
+def desenharGameOver(largura_tela, altura_tela, callback_menu):
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glOrtho(0, largura_tela, altura_tela, 0, -1, 1)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    # --- Desenhar botão "Tentar Novamente" ---
+    largura_botao = largura_tela * 0.25  # 25% da largura da tela
+    altura_botao = altura_tela * 0.1    # 10% da altura da tela
+    x_botao = (largura_tela - largura_botao) / 2
+    y_botao = altura_tela * 0.65  # Ajuste para estar abaixo do centro
+
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_GameOver["try_again"][1])
+    
+    glColor3f(1,1,1)
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0); glVertex2f(x_botao, y_botao)
+    glTexCoord2f(1, 0); glVertex2f(x_botao + largura_botao, y_botao)
+    glTexCoord2f(1, 1); glVertex2f(x_botao + largura_botao, y_botao + altura_botao)
+    glTexCoord2f(0, 1); glVertex2f(x_botao, y_botao + altura_botao)
+    glEnd()
+
+    glDisable(GL_TEXTURE_2D)
+
+    # --- Desenhar fundo de Game Over ---
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_GameOver["game_over"][1])
+    glColor3f(0, 0, 0)
+
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0); glVertex2f(0, 0)
+    glTexCoord2f(1, 0); glVertex2f(largura_tela, 0)
+    glTexCoord2f(1, 1); glVertex2f(largura_tela, altura_tela)
+    glTexCoord2f(0, 1); glVertex2f(0, altura_tela)
+    glEnd()
+
+    
+
+    glDisable(GL_TEXTURE_2D)
+
+    return (x_botao, y_botao, largura_botao, altura_botao, callback_menu)  # Retorna os dados do botão para detecção de clique
+
+
 def lerp(a, b, t):
     return a + (b - a) * t
 
@@ -496,7 +543,8 @@ def calc_colision(posição_jogador):
                             z + deslocamento_z <= (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
                         ):
                             consts.offset_sky = 0
-                            print('gameover') # Game Over
+                            # Game Over
+                            consts.tela = "game_over"
                             return True
                     elif (tipo_obstaculo == 3): # Pedra
                         if (
@@ -511,3 +559,6 @@ def calc_colision(posição_jogador):
     print('não colisão')
     consts.offset_sky = 0.015
     return False
+
+def voltaMenu():
+    consts.tela = "Criacao"

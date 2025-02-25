@@ -4,10 +4,10 @@ import glm
 
 movimentando_esq = False
 movimentando_dir = False
-colisao = False
 
 offset_sky = 0.015
 
+vidas = 3
 tela ="criacao"
 botao_selecionado = (0.1, 0.1, 0.1)
 
@@ -38,6 +38,11 @@ texturas_botoes = {
     "iniciar" : [os.path.join("textures", "iniciar.png"), 0],
     "prox" : [os.path.join("textures", "proximo_seg.png"), 0],
     "ant" : [os.path.join("textures", "anterior_seg.png"), 0],
+}
+
+texturas_GameOver = {
+    "game_over" : [os.path.join("textures", "game_over.jpg"), 0], 
+    "try_again" : [os.path.join("textures", "try_again.jpg"), 0]
 }
 
 cor_para_numero = {

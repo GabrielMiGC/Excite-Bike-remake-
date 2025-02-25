@@ -64,9 +64,16 @@ def main():
     # Carregar texturar dos botões de criação da pista e iniciar
     for textura in consts.texturas_botoes.values():
         textura[1] = util.carregar_textura(textura[0])
+
+    #carregar texturas dos botoes do game over
+    for textura in consts.texturas_GameOver.values():
+        textura[1] = util.carregar_textura(textura[0])
+    
+
         
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
+    
     while not glfw.window_should_close(window):
         glfw.poll_events()
         util.update_movimento(consts.movimentando_esq, consts.movimentando_dir) # movimento da moto
@@ -77,10 +84,12 @@ def main():
         elif consts.tela == "jogo":
             consts.colisao = util.calc_colision(posicao_jogador)
             if consts.colisao:
-                print("Colisão detectada!")
+                pass
             else:
                 posicao_jogador += 0.25
             util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto)
+        elif consts.tela == "game_over":
+            util.desenharGameOver(largura_tela, altura_tela, callback_menu=util.voltaMenu)
         glfw.swap_buffers(window)
     glfw.terminate()
     
