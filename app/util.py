@@ -186,14 +186,14 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     glLoadIdentity()
     gluPerspective(50, 1440 / 1040, 0.1, 100)
     glMatrixMode(GL_MODELVIEW)
-            
+
     glClearColor(0, 0, 0.5, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
 
     # Controle da transição da câmera
     target_cam_pos = posicoes_camera[index_camera]
-    
+
     # Iniciar nova transição se a câmera mudar
     if camera_state.target_cam_pos != target_cam_pos:
         camera_state.start_cam_pos = camera_state.current_cam_pos or target_cam_pos
@@ -205,15 +205,15 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     if camera_state.is_transitioning:
         elapsed = time.time() - camera_state.transition_start_time
         t = min(elapsed / camera_state.transition_duration, 1.0)
-        
+
         t_ease = t * t * (3 - 2 * t)
-        
+
         # Interpolar todos os componentes da câmera
         cam_pos = [
             lerp(camera_state.start_cam_pos[i], camera_state.target_cam_pos[i], t_ease)
             for i in range(9)
         ]
-        
+
         if t >= 1.0:
             camera_state.is_transitioning = False
         camera_state.current_cam_pos = cam_pos
@@ -225,7 +225,7 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
         cam_pos[3], cam_pos[4], posicao_jogador + cam_pos[5],
         cam_pos[6], cam_pos[7], cam_pos[8]
     )
-    
+
     glPushMatrix()
     glTranslatef(0, -1, cam_pos[2] + posicao_jogador + 6)
     glRotatef(90, 0, 1, 0)
@@ -244,8 +244,114 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     glTranslatef(0, 0, posicao_jogador + 10)
     skybox.draw_cube()
     glPopMatrix()
+    
+    # Habilitando modo 2D para desenhar as vidas
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, largura_tela, altura_tela, 0, -1, 1)  # Define coordenadas da tela
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    glDisable(GL_DEPTH_TEST)
+
+    # Desenha as vidas no canto superior esquerdo
+    vida_tamanho = 50  # Tamanho do ícone de vida
+    vida_espaco = 10   # Espaço entre as vidas
+    fundo_margem = 15   # Margem extra para o fundo ser maior
+
+    num_vidas = len(consts.VIDAS)
+    largura_fundo = num_vidas * vida_tamanho + (num_vidas - 1) * vida_espaco + 2 * fundo_margem
+    altura_fundo = vida_tamanho + 2 * fundo_margem
+
+    x_fundo = 20 - fundo_margem  # Posição inicial do fundo
+    y_fundo = 20 - fundo_margem 
+    
+    # Desenha um único retângulo de fundo
+    glColor3f(1, 1, 1)  # Cor do fundo (branco)
+    glBegin(GL_QUADS)
+    glVertex2f(x_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo + altura_fundo)
+    glVertex2f(x_fundo, y_fundo + altura_fundo)
+    glEnd()
+    
+    # Desenha as vidas sobre o fundo
+    for index, i in enumerate(consts.VIDAS):
+        x = 20 + index * (vida_tamanho + vida_espaco)  # Posição na tela
+        y = 20  # Posição no topo da tela
+        
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["Vidas"][i][1])
+        
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(x, y)  # Canto superior esquerdo
+        glTexCoord2f(1, 0); glVertex2f(x + vida_tamanho, y)  # Canto superior direito
+        glTexCoord2f(1, 1); glVertex2f(x + vida_tamanho, y + vida_tamanho)  # Canto inferior direito
+        glTexCoord2f(0, 1); glVertex2f(x, y + vida_tamanho)  # Canto inferior esquerdo
+        glEnd()
+        
+        glDisable(GL_TEXTURE_2D)
+
+    # Restaurar matriz de projeção
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glEnable(GL_DEPTH_TEST)
 
 def desenharGameOver(largura_tela, altura_tela, callback_menu):
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, largura_tela, altura_tela, 0, -1, 1)  # Define coordenadas da tela
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    glDisable(GL_DEPTH_TEST)
+
+    # Desenha as vidas no canto superior esquerdo
+    vida_tamanho = 50  # Tamanho do ícone de vida
+    vida_espaco = 10   # Espaço entre as vidas
+    fundo_margem = 15   # Margem extra para o fundo ser maior
+
+    num_vidas = len(consts.VIDAS)
+    largura_fundo = num_vidas * vida_tamanho + (num_vidas - 1) * vida_espaco + 2 * fundo_margem
+    altura_fundo = vida_tamanho + 2 * fundo_margem
+
+    x_fundo = 20 - fundo_margem  # Posição inicial do fundo
+    y_fundo = 20 - fundo_margem 
+    
+    # Desenha um único retângulo de fundo
+    glColor3f(1, 1, 1)  # Cor do fundo (branco)
+    glBegin(GL_QUADS)
+    glVertex2f(x_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo)
+    glVertex2f(x_fundo + largura_fundo, y_fundo + altura_fundo)
+    glVertex2f(x_fundo, y_fundo + altura_fundo)
+    glEnd()
+    
+    # Desenha as vidas sobre o fundo
+    for index, i in enumerate(consts.VIDAS):
+        x = 20 + index * (vida_tamanho + vida_espaco)  # Posição na tela
+        y = 20  # Posição no topo da tela
+        
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, consts.texturas_botoes["Vidas"][i][1])
+        
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0); glVertex2f(x, y)  # Canto superior esquerdo
+        glTexCoord2f(1, 0); glVertex2f(x + vida_tamanho, y)  # Canto superior direito
+        glTexCoord2f(1, 1); glVertex2f(x + vida_tamanho, y + vida_tamanho)  # Canto inferior direito
+        glTexCoord2f(0, 1); glVertex2f(x, y + vida_tamanho)  # Canto inferior esquerdo
+        glEnd()
+        
+        glDisable(GL_TEXTURE_2D)
+
+    return (x_botao, y_botao, largura_botao, altura_botao, callback_menu)  # Retorna os dados do botão para detecção de clique
+
+
+def desenharGameOver(largura_tela, altura_tela, callback):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     glOrtho(0, largura_tela, altura_tela, 0, -1, 1)
@@ -276,7 +382,7 @@ def desenharGameOver(largura_tela, altura_tela, callback_menu):
     # --- Desenhar fundo de Game Over ---
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, consts.texturas_GameOver["game_over"][1])
-    glColor3f(0, 0, 0)
+    glColor3f(1, 1, 1)
 
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0); glVertex2f(0, 0)
@@ -289,7 +395,7 @@ def desenharGameOver(largura_tela, altura_tela, callback_menu):
 
     glDisable(GL_TEXTURE_2D)
 
-    return (x_botao, y_botao, largura_botao, altura_botao, callback_menu)  # Retorna os dados do botão para detecção de clique
+    return (x_botao, y_botao, largura_botao, altura_botao, callback)  # Retorna os dados do botão para detecção de clique
 
 
 def lerp(a, b, t):
@@ -311,6 +417,10 @@ def key_callback(window, key, scancode, action, mods):
             consts.movimentando_dir = True
         elif action == glfw.RELEASE:
             consts.movimentando_dir = False
+    if key == glfw.KEY_R and consts.tela=="game_over":
+        consts.segmentos_matrizes = {}
+        consts.coordenadas_obstaculos = []
+        consts.tela = "criacao"
 
 def mouse_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS :
@@ -433,11 +543,31 @@ def mouse_callback(window, button, action, mods):
 
             consts.matriz_cores[consts.segmento_atual][y][x] = consts.botao_selecionado
 
-def shading (): #Phong
-    # Reflexão do ambiente (Ra = Ia * Ka)
-    ambientShading = CONSTS.light
+def shading (point, normal, objeto): #Phong
+    # reflexão ambiente (Ra = Ia * Ka)
+    shadeAmbient = consts.lightAmbient * consts.surfaceAmbient
 
-    return shades
+    # reflexão difusa (Rd = Id * Kd * (l * n))
+    l = glm.normalize(consts.lightPosition - point) # Luz - Ponto
+    n = glm.normalize(normal)
+    shadeDiffuse = objeto.lightDiffuse * objeto.surfaceDiffuse * glm.max(0.0, glm.dot(l,n))
+
+    # reflexão especular (Rs = Is  * Ks * (v * r)^e)
+    avg_x = sum(c[0] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+    avg_y = sum(c[1] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+    avg_z = sum(c[2] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+
+    camera_position = glm.vec3(avg_x, avg_y, avg_z)  # Cria um vec3 com a média das posições
+    v = glm.normalize(camera_position - point)
+
+
+
+    r = 2*glm.dot(n,l)*n - l
+    shadeSpecular = objeto.lightSpecular * objeto.surfaceSpecular * glm.max(0, glm.dot(v,r) ** objeto.surfaceShine)
+
+    # modelo de iluminação de Phong (R = Ra + Rd + Rs)
+    shade = shadeAmbient + shadeDiffuse + shadeSpecular
+    return shade
 
 def load_obj(filename):
     vertices = []
@@ -555,7 +685,20 @@ def calc_colision(posição_jogador):
                         ):
                             consts.offset_sky = 0
                             print('perde vida') # Perde vida
-                            return True
+                                                        
+                            if posição_jogador not in consts.posicoes_perda_vida:  # Verifica se já perdeu vida nessa posição
+                                consts.posicoes_perda_vida.add(posição_jogador)  # Registra a posição
+
+                                # Percorre o vetor de trás para frente e troca o último 1 por 0
+                                for i in range(len(consts.VIDAS) - 1, -1, -1):
+                                    if consts.VIDAS[i] == 1:
+                                        consts.VIDAS[i] = 0
+                                        break  # Para no primeiro 1 encontrado
+                                    
+                                # Verifica se não há mais vidas
+                                if sum(consts.VIDAS) == 0:  # Se a soma for 0, significa que todas as vidas foram perdidas
+                                    consts.tela = "game_over"  # Muda para a tela de game over
+                   
     print('não colisão')
     consts.offset_sky = 0.015
     return False

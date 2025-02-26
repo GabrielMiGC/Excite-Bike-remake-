@@ -62,8 +62,12 @@ def main():
     consts.obstaculo3 = Pedra(0, 0, 5, 1.5)
     
     # Carregar texturar dos botões de criação da pista e iniciar
-    for textura in consts.texturas_botoes.values():
-        textura[1] = util.carregar_textura(textura[0])
+    for chave, textura in consts.texturas_botoes.items():
+        if chave == "Vidas":
+            for vida in textura:
+                vida[1] = util.carregar_textura(vida[0])  # Carrega a textura e armazena no índice [1]
+        else:
+            textura[1] = util.carregar_textura(textura[0])
 
     #carregar texturas dos botoes do game over
     for textura in consts.texturas_GameOver.values():
@@ -80,6 +84,9 @@ def main():
         sky.update_offset(consts.offset_sky)  # Update the offset for the side faces
         
         if consts.tela == "criacao":
+            posicao_jogador = 0  # Redefine a posição do jogador
+            for pista in pistas:
+                pista.posicao_inicial = 0  # Redefine a posição inicial da pista
             util.desenharMenu(largura_tela, altura_tela)
         elif consts.tela == "jogo":
             consts.colisao = util.calc_colision(posicao_jogador)
@@ -87,9 +94,12 @@ def main():
                 pass
             else:
                 posicao_jogador += 0.25
-            util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto)
+            util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto, largura_tela, altura_tela)
         elif consts.tela == "game_over":
-            util.desenharGameOver(largura_tela, altura_tela, callback_menu=util.voltaMenu)
+            consts.segmentos_matrizes = {}
+            consts.coordenadas_obstaculos = []
+            util.desenharGameOver(largura_tela, altura_tela, util.voltaMenu)
+            
         glfw.swap_buffers(window)
     glfw.terminate()
     
