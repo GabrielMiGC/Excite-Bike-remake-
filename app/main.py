@@ -69,7 +69,10 @@ def main():
         else:
             textura[1] = util.carregar_textura(textura[0])
 
-        
+    # Carregar texturas do Game Over
+    for textura in consts.texturas_GameOver.values():
+        textura[1] = util.carregar_textura(textura[0])
+    
     sky = Skybox(consts.cube_textures)
     posicao_jogador = 0
     while not glfw.window_should_close(window):
@@ -86,6 +89,11 @@ def main():
             else:
                 posicao_jogador += 0.25
             util.desenharCena(pistas, posicao_jogador, sky, consts.posicoes_camera, consts.index_camera_atual, moto, largura_tela, altura_tela)
+        elif consts.tela == "game_over":
+            util.desenharGameOver(largura_tela, altura_tela, util.voltaMenu)
+            posicao_jogador = 0
+            for pista in pistas:
+                pista.posicao_inicial = 0  # Redefine a posição inicial da pista
         glfw.swap_buffers(window)
     glfw.terminate()
     

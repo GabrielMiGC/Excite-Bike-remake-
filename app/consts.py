@@ -48,6 +48,16 @@ texturas_botoes = {
     ]
 }
 
+texturas_GameOver = {
+    "game_over" : [os.path.join("textures", "game_over.png"), 0], 
+    "try_again" : [os.path.join("textures", "try_again.png"), 0]
+}
+
+# Constantes para iluminação
+lightAmbient = glm.vec3(0.1)    # Ia
+surfaceAmbient = glm.vec3(0.1)  # Ka
+lightPosition = glm.vec3(0, 10, 10)
+
 cor_para_numero = {
     (0.1, 0.1, 0.1): 0,
     (1.0, 0.0, 0.0): 1,  # Vermelho

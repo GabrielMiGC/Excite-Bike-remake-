@@ -40,6 +40,7 @@ def desenharMenu(largura_tela, altura_tela):
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
     
+    glClearColor(0, 0, 0, 0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
     largura_matriz = largura_tela * 0.8
@@ -300,6 +301,52 @@ def desenharCena(pistas, posicao_jogador, skybox, posicoes_camera, index_camera,
     glMatrixMode(GL_MODELVIEW)
     glEnable(GL_DEPTH_TEST)
 
+def desenharGameOver(largura_tela, altura_tela, callback):
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glOrtho(0, largura_tela, altura_tela, 0, -1, 1)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    # --- Desenhar botão "Tentar Novamente" ---
+    largura_botao = largura_tela * 0.25  # 25% da largura da tela
+    altura_botao = altura_tela * 0.1    # 10% da altura da tela
+    x_botao = (largura_tela - largura_botao) / 2
+    y_botao = altura_tela * 0.65  # Ajuste para estar abaixo do centro
+
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_GameOver["try_again"][1])
+    
+    glColor3f(1,1,1)
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0); glVertex2f(x_botao, y_botao)
+    glTexCoord2f(1, 0); glVertex2f(x_botao + largura_botao, y_botao)
+    glTexCoord2f(1, 1); glVertex2f(x_botao + largura_botao, y_botao + altura_botao)
+    glTexCoord2f(0, 1); glVertex2f(x_botao, y_botao + altura_botao)
+    glEnd()
+
+    glDisable(GL_TEXTURE_2D)
+
+    # --- Desenhar fundo de Game Over ---
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, consts.texturas_GameOver["game_over"][1])
+    glColor3f(1, 1, 1)
+
+    glBegin(GL_QUADS)
+    glTexCoord2f(0, 0); glVertex2f(0, 0)
+    glTexCoord2f(1, 0); glVertex2f(largura_tela, 0)
+    glTexCoord2f(1, 1); glVertex2f(largura_tela, altura_tela)
+    glTexCoord2f(0, 1); glVertex2f(0, altura_tela)
+    glEnd()
+
+    
+
+    glDisable(GL_TEXTURE_2D)
+
+    return (x_botao, y_botao, largura_botao, altura_botao, callback)  # Retorna os dados do botão para detecção de clique
+
 def lerp(a, b, t):
     return a + (b - a) * t
 
@@ -319,6 +366,17 @@ def key_callback(window, key, scancode, action, mods):
             consts.movimentando_dir = True
         elif action == glfw.RELEASE:
             consts.movimentando_dir = False
+    if key == glfw.KEY_R and consts.tela=="game_over":
+        consts.segmentos_matrizes = {}
+        consts.coordenadas_obstaculos = []
+        consts.matriz_cores = {
+            chave: [[(0.1, 0.1, 0.1) for _ in range(consts.NUM_COLUNAS)] for _ in range(consts.NUM_LINHAS)] for chave in range(1, int(consts.max_segmento + 1))   # Branco por padrão
+        }
+        consts.segmento_atual = 1
+        consts.VIDAS = [1 for _ in range(consts.NUM_VIDAS)]
+        consts.positionBike.z = 0
+        consts.index_camera_atual = 0
+        consts.tela = "criacao"
 
 def mouse_callback(window, button, action, mods):
     if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS :
@@ -393,8 +451,11 @@ def mouse_callback(window, button, action, mods):
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
             consts.coordenadas_obstaculos = [
-                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
-                for seg, linha in enumerate(matriz)
+                [
+                    [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == tipo]  
+                    for seg, linha in enumerate(matriz)
+                ]
+                for tipo in [1, 2, 3]
             ]
             
             consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
@@ -413,8 +474,11 @@ def mouse_callback(window, button, action, mods):
             z_values = [2.5, -2.5, -7.5]
             matriz = np.array(matriz_exported)
             consts.coordenadas_obstaculos = [
-                [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == 1]  
-                for seg, linha in enumerate(matriz)
+                [
+                    [(idx * 5, z_values[seg]) for idx, val in enumerate(linha) if val == tipo]  
+                    for seg, linha in enumerate(matriz)
+                ]
+                for tipo in [1, 2, 3]
             ]
             
             consts.segmentos_matrizes[int(consts.segmento_atual)] = consts.coordenadas_obstaculos
@@ -441,11 +505,29 @@ def mouse_callback(window, button, action, mods):
 
             consts.matriz_cores[consts.segmento_atual][y][x] = consts.botao_selecionado
 
-def shading (): #Phong
-    # Reflexão do ambiente (Ra = Ia * Ka)
-    ambientShading = CONSTS.light
+def shading (point, normal, objeto): #Phong
+    # reflexão ambiente (Ra = Ia * Ka)
+    shadeAmbient = consts.lightAmbient * consts.surfaceAmbient
 
-    return shades
+    # reflexão difusa (Rd = Id * Kd * (l * n))
+    l = glm.normalize(consts.lightPosition - point) # Luz - Ponto
+    n = glm.normalize(normal)
+    shadeDiffuse = objeto.lightDiffuse * objeto.surfaceDiffuse * glm.max(0.0, glm.dot(l,n))
+
+    # reflexão especular (Rs = Is  * Ks * (v * r)^e)
+    avg_x = sum(c[0] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+    avg_y = sum(c[1] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+    avg_z = sum(c[2] for c in consts.posicoes_camera) / len(consts.posicoes_camera)
+
+    camera_position = glm.vec3(avg_x, avg_y, avg_z)  # Cria um vec3 com a média das posições
+    v = glm.normalize(camera_position - point)
+
+    r = 2 * glm.dot(n,l) * n - l
+    shadeSpecular = objeto.lightSpecular * objeto.surfaceSpecular * glm.max(0, glm.dot(v,r) ** objeto.surfaceShine)
+
+    # modelo de iluminação de Phong (R = Ra + Rd + Rs)
+    shade = shadeAmbient + shadeDiffuse + shadeSpecular
+    return shade
 
 def load_obj(filename):
     vertices = []
@@ -551,7 +633,7 @@ def calc_colision(posição_jogador):
                             z + deslocamento_z <= (posição_jogador + 6 + consts.COMPRIMENTO_MOTO)
                         ):
                             consts.offset_sky = 0
-                            print('gameover') # Game Over
+                            consts.tela = "game_over"
                             return True
                     elif (tipo_obstaculo == 3): # Pedra
                         if (
@@ -576,6 +658,9 @@ def calc_colision(posição_jogador):
                                     consts.tela = "game_over"  # Muda para a tela de game over
                             
                             return True
-    print('não colisão')
+
     consts.offset_sky = 0.015
     return False
+
+def voltaMenu():
+    consts.tela = "criacao"
