@@ -16,6 +16,11 @@ class Pista:
         self.offset = 0.0
         self.raias = 3  # Número de raias
         self.largura_raia = largura / self.raias
+        self.lightDiffuse = glm.vec3(1.0)      # Id               
+        self.surfaceDiffuse = glm.vec3(1.0)    # Kd       
+        self.lightSpecular = glm.vec3(1.0)     # Is
+        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
+        self.surfaceShine = 250 
 
         # Parâmetros da onda
         self.wave_length = 20.0  # Comprimento de onda
@@ -110,3 +115,73 @@ class Pista:
         if self.texturas:
             glBindTexture(GL_TEXTURE_2D, 0)
             glDisable(GL_TEXTURE_2D)
+
+    """def desenhar(self):
+        glColor3f(1, 1, 1)
+
+        if not consts.colisao:
+            self.offset += self.velocidade
+            if self.offset >= 1000.0:
+                self.offset -= 1000.0
+        # else:
+        #     self.offset = 0
+        
+        # Ajuste dinâmico de segmentos baseado no comprimento da onda
+        segments = int(self.comprimento / (self.wave_length / 4))  # 4 segmentos por onda
+        delta_z = self.comprimento / segments
+
+        # Desenha cada raia separadamente
+        for raia in range(self.raias):
+            if self.texturas:
+                glEnable(GL_TEXTURE_2D)
+                glBindTexture(GL_TEXTURE_2D, self.texturas[raia % len(self.texturas)])
+
+            # Calcula os limites da raia
+            x_left = -self.largura/2 + raia * self.largura_raia
+            x_right = x_left + self.largura_raia
+
+            glBegin(GL_QUAD_STRIP)
+            for i in range(segments + 1):
+                z = i * delta_z
+                y = self.get_y(z)
+                s = (z / self.comprimento) * 1000 + self.offset
+
+                # Normal aproximada apontando para cima
+                normal = glm.vec3(0.0, 1.0, 0.0)
+                
+                # Vértices para esta raia
+                point_left = glm.vec3(x_left, y, z)
+                point_right = glm.vec3(x_right, y, z)
+
+                # Aplicar iluminação
+                shade_left = shading(point_left, normal, self)
+                shade_right = shading(point_right, normal, self)
+
+                glColor3f(shade_left.x, shade_left.y, shade_left.z)
+                glTexCoord2f(s, 0)
+                glVertex3f(x_left, y, z)
+
+                glColor3f(shade_right.x, shade_right.y, shade_right.z)
+                glTexCoord2f(s, 1)
+                glVertex3f(x_right, y, z)
+            glEnd()
+
+            if self.texturas:
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glDisable(GL_TEXTURE_2D)
+        
+        # Desenha obstáculo
+        for segmento, coordenadas_pista in consts.segmentos_matrizes.items():
+            for tipo_obstaculo, coordenadas_raias in enumerate(coordenadas_pista, start=1):
+                deslocamento_z = (segmento - 1) * 100 
+                for raia in coordenadas_raias:  # Itera sobre as raias 
+                    for (z, x) in raia:  # Para cada par de coordenadas (z, x)
+                        glPushMatrix()
+                        obstaculo = getattr(consts, f"obstaculo{tipo_obstaculo}")
+                        obstaculo.position = glm.vec3(x, 0, z + deslocamento_z)  # Define a posição do obstáculo
+                        obstaculo.desenhar()  # Chama a função de desenhar o obstáculo
+                        glPopMatrix()
+            
+        if self.texturas:
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glDisable(GL_TEXTURE_2D)"""

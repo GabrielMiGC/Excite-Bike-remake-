@@ -56,7 +56,7 @@ texturas_GameOver = {
 # Constantes para iluminação
 lightAmbient = glm.vec3(0.1)    # Ia
 surfaceAmbient = glm.vec3(0.1)  # Ka
-lightPosition = glm.vec3(0, 10, 10)
+lightPosition = glm.vec3(0, 10, 50)
 
 cor_para_numero = {
     (0.1, 0.1, 0.1): 0,

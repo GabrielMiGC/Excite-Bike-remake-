@@ -48,7 +48,6 @@ def inicializar_pistas():
     return pistas
 
 
-
 # Programa principal
 def main():
     window, largura_tela, altura_tela = inicializar_glfw()
